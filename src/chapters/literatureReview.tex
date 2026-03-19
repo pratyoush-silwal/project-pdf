@@ -1,0 +1,62 @@
+\chapter{Literature Review}
+\label{chap:literature_review}
+
+% Overview of the intersection congestion problem and the baseline study for Thapathali
+\noindent Urban intersections are recurring bottlenecks where conflicting traffic streams compete for limited green time. Conventional signal timing can improve intersection performance, but it often depends on simplified assumptions and periodic manual retiming. In practice, traffic demand varies by time of day and day type, and static plans may not remain effective under changing conditions. For the Thapathali Intersection specifically, prior local work has evaluated the intersection as an isolated study area using observed peak-hour traffic volumes and operational performance measures (\eg delay, queue-related indicators, and level of service), providing realistic context and baseline conditions for simulation-based signal studies \cite{maharjan2023performance}.
+
+% Fixed-time, actuated, and rule-based approaches to intersection signal timing
+\section{Conventional Traffic Signal Control Methods}
+\label{sec:conventional_methods}
+\noindent Traditional signal control approaches for an isolated intersection commonly produce a cycle-based plan consisting of a phase sequence, cycle length, and green splits. A widely used classical method is Webster-type timing, which computes timing parameters from traffic volume and related assumptions to generate a fixed-time plan for an individual intersection \cite{wei2020survey}. Beyond fixed-time plans, actuated and rule-based controllers adjust phase changes based on detector inputs and predefined rules, offering limited responsiveness without learning \cite{wei2020survey}. At a higher level, transportation methods can be grouped into (i) fixed-time control, (ii) actuated/rule-based control, (iii) selection-based adaptive control (choosing among precomputed plans), and (iv) optimization-based adaptive control that explicitly optimizes an objective under simplified flow models \cite{wei2020survey}. These approaches are practical and interpretable, but they can require careful calibration, may rely on oversimplified traffic representations, and may not adapt effectively to complex, time-varying patterns. 
+
+A particularly relevant conventional baseline is max-pressure control, which uses real-time queue information to select phases that balance upstream and downstream congestion \cite{wei2020survey}. Max-pressure has theoretical properties related to throughput under certain conditions, making it a strong comparator for learning-based controllers. However, it remains a greedy decision rule and does not learn long-term policies from interaction.
+
+% Framing traffic signal control as a sequential decision-making problem using reinforcement learning
+\section{RL for Traffic Signal Control}
+\label{sec:rl_traffic_control}
+\noindent \gls{rl} reframes signal control as a sequential decision-making process: an agent observes traffic conditions, takes an action (\eg choosing the next phase or adjusting green time), and receives a reward reflecting operational quality (\eg reduced delay or queues). \gls{rl} is attractive for traffic signal control because ``optimal'' timing is difficult to label in advance for all scenarios; instead, policies can be learned through trial-and-error interaction in a simulator \cite{wei2020survey}. For a single intersection, the main design choices typically involve: (1) the state representation (what the agent observes), (2) the action space (what the agent can control), and (3) the reward function (what the agent is incentivized to optimize). Practical state elements often include per-lane vehicle counts/queues and the current signal phase, while rewards are usually derived from delay/queue metrics or throughput-related measures \cite{wei2019colight,wei2020survey}.
+
+% Application of deep neural networks to approximate Q-values for traffic control decisions
+\section{DRL and Value-Based Control with DQN}
+\label{sec:drl_dqn_control}
+\noindent \gls{drl} extends \gls{rl} by using neural networks to approximate value functions or policies, enabling learning from richer traffic states. A common value-based method is the \gls{dqn}, which estimates action-values and can be trained using experience replay to stabilize learning \cite{wei2019presslight}. A key challenge in many \gls{drl} traffic-signal studies is that performance can be highly sensitive to reward and state design; overly complex states and heuristic rewards can slow training or lead to unstable outcomes. To address this, one approach explicitly grounds \gls{drl} design in transportation theory by connecting \gls{rl} to max-pressure concepts: the reward is shaped to align with pressure-based objectives, and the state is designed to retain only the information necessary to optimize that objective \cite{wei2019presslight}. This is important even for a single-intersection project because principled reward/state choices can improve learning stability and reduce unnecessary modeling complexity.
+
+In addition to reward/state design, evaluation practice in \gls{drl} traffic signal control typically compares learned policies to conventional baselines such as fixed-time plans and other transportation-inspired controllers, using metrics like travel time, delay, queue length, and throughput to quantify benefits \cite{wei2019presslight,wei2020survey}. For single-intersection studies, these comparisons are crucial to demonstrate that learning provides value beyond strong non-learning baselines.
+
+% Multi-intersection coordination and its relevance to future extensions of this work
+\section{Network-Level Coordination as Context for Future Extension}
+\label{sec:network_coordination}
+\noindent Although the present project targets one intersection, the literature on multi-intersection control highlights why coordination is beneficial and how learning methods represent neighboring influence. One \gls{drl} approach models traffic signal control as a Markov game where each intersection is controlled by an agent, and neighboring intersections influence one another through learned cooperation \cite{wei2019colight}. In that formulation, an agent's observation includes its current phase (often as a one-hot vector) and lane-level vehicle counts, while a learned attention mechanism assigns different weights to neighbors depending on spatial and temporal conditions \cite{wei2019colight}. The method's Q-learning style objective reflects value-based learning with a function approximator and a loss that penalizes Q-value prediction errors across intersections and time steps \cite{wei2019colight}. Even when applied to a single intersection, these ideas motivate using lane-level counts and explicit phase information as core state variables and reinforce the importance of scalable representations if later extension to multi-intersection coordination is desired.
+
+% Phase-level action representation and exploiting geometric symmetry for sample efficiency
+\section{Structured Policy Learning via Phase Competition and Symmetry}
+\label{sec:structured_policy_learning}
+\noindent Another relevant direction improves learning efficiency by structuring how actions (phases) are represented. A phase-competition approach argues that many traffic states are equivalent under rotation and flipping (symmetry) and that \gls{rl} agents should generalize across such cases without relearning from scratch \cite{zheng2019learning}. The method leverages this observation by modeling competition among phases, prioritizing movements with higher demand when conflicts exist, and explicitly designing the model to be invariant to symmetric transformations \cite{zheng2019learning}. For a single intersection, this supports two practical design lessons: (1) the action space should reflect meaningful phase choices rather than overly granular controls that increase exploration burden, and (2) the model/state design can exploit structural regularities in intersection layouts to improve sample efficiency.
+
+% Role of SUMO simulation and local data in validating the proposed approach
+\section{Simulation and Realistic Data Grounding}
+\label{sec:simulation_grounding}
+\noindent \gls{drl} traffic signal control is commonly developed and validated in simulation for safety, repeatability, and fast iteration. \gls{sumo} is frequently used as it can execute signal actions, simulate vehicle movements, and provide state measurements required by controllers \cite{zheng2019learning}. For Thapathali, local operational data provides a valuable foundation for building realistic simulation demand and for defining baseline performance expectations. The Thapathali case study reports peak-hour traffic volumes (in \gls{pcu}) for multiple observation days and provides approach-level volume distributions, which can be mapped into simulation flows \cite{maharjan2023performance}. It also reports performance statistics such as degree of saturation, average delay, level of service, and queue-related measures for the existing intersection operation and for candidate improvement options \cite{maharjan2023performance}. Such data is particularly useful for a minor project because it enables (i) calibration of traffic demand patterns in simulation, and (ii) evaluation of whether learned signal policies improve meaningful operational indicators under realistic conditions.
+
+% Synthesis of reviewed literature and positioning of this project relative to the state of the art
+\section{Summary and Project Positioning}
+\label{sec:lit_review_summary}
+\noindent Overall, the literature indicates a progression from fixed-time and rule-based controllers toward learning-based adaptive control capable of reacting to dynamic traffic states. Conventional transportation methods remain important as baselines and as sources of theory-driven guidance (\eg max-pressure). \gls{drl} methods such as \gls{dqn} provide a practical foundation for adaptive control, but their success depends strongly on state, action, and reward design. Theory-grounded \gls{drl} designs linked to established traffic principles can improve stability and interpretability \cite{wei2019presslight}, while attention-based cooperation and symmetry-aware phase modeling illustrate pathways for scalability and efficiency \cite{wei2019colight,zheng2019learning}. For a single-intersection implementation at Thapathali, a \gls{dqn}-based \gls{drl} agent trained in \gls{sumo} and grounded in realistic local traffic volumes provides a manageable scope while still aligning with the most effective practices observed in the literature \cite{wei2020survey,maharjan2023performance}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Comparison of Traffic Signal Control Methods}
+    \label{tab:traffic_control_methods}
+    \begin{tabular}{p{2.5cm}p{4cm}p{4cm}p{4.5cm}}
+        \toprule
+        \textbf{Method} & \textbf{Control Logic} & \textbf{Adaptivity} & \textbf{Data Needs} \\
+        \midrule
+        Fixed Time & Pre-set cycle length, phase order, and green splits (static plan). & Low: no real-time response; only changes if manually retimed. & Historical/observed volumes for timing design; no training required. \\
+        \addlinespace
+        Max Pressure & Selects phase with highest pressure using upstream vs downstream queue imbalance (rule-based). & High: reacts instantly to queues, but remains a fixed greedy rule (no learning). & Real-time queue/occupancy (ideally downstream too); no training dataset. \\
+        \addlinespace
+        DQN-based DRL & Learns a signal policy by maximizing reward through simulation interaction. & High: learns and adapts a policy to objectives and constraints. & Training episodes in \gls{sumo}; state features; compute and tuning effort. \\
+        \bottomrule
+    \end{tabular}
+\end{table}

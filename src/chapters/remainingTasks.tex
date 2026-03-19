@@ -1,0 +1,56 @@
+\chapter{Remaining Tasks}
+\label{chap:remaining_tasks}
+
+% Work completed up to the current reporting period
+\section{Completed Tasks}
+\label{sec:completed_tasks}
+The following work has been completed up to this point:
+\begin{itemize}
+    \item Data collection and vehicle allocation from relevant sources.
+    \item Initial configuration of \gls{sumo} for the Thapathali intersection, including road layout, traffic flow, and signal configuration.
+    \item Setup of the simulation environment for testing the traffic control system.
+    \item Fixed-timer logic configuration for baseline comparison.
+    \item \gls{dqn} agent design and implementation for traffic signal optimization.
+    \item Initial model training and testing with simulated traffic data.
+\end{itemize}
+
+% Outstanding milestones and tasks still in progress
+\section{Remaining Milestones}
+\label{sec:remaining_milestones}
+The following tasks are still in progress:
+\begin{itemize}
+    \item \textbf{Finalize Environment Setup:} Ensure the \gls{sumo} environment is fully functional with accurate data integration and parameter fine-tuning.
+    \item \textbf{Fine-tune DQN Network:} Improve the \gls{dqn} model architecture and hyperparameters to enhance real-time decision-making accuracy.
+    \item \textbf{Model Evaluation:} Exhaustive testing of the trained agent in various simulation scenarios to evaluate performance metrics.
+\end{itemize}
+
+% Known blockers and corresponding mitigation strategies
+\section{Blockers and Mitigations}
+\label{sec:blockers_mitigations}
+
+\subsection{Blockers}
+\label{subsec:blockers}
+We have identified the following potential challenges:
+\begin{itemize}
+    \item \gls{dqn} performance under highly dynamic or unpredictable traffic surges.
+    \item Computational requirements during intensive model training phases.
+    \item Potential synchronization issues between the \gls{traci} interface and the agent logic.
+\end{itemize}
+
+\subsection{Mitigations}
+\label{subsec:mitigations}
+To address these challenges, we have implemented several strategies:
+\begin{itemize}
+    \item Controlled testing with incremental complexity in traffic patterns.
+    \item Utilizing optimized training cycles and potentially leveraging higher-compute resources if needed.
+    \item Robust error handling and logging within the \gls{traci} control script.
+\end{itemize}
+
+% Potential extensions and improvements beyond the current project scope
+\section{Future Work}
+\label{sec:remaining_future_work}
+Future development may include:
+\begin{itemize}
+    \item \textbf{Multi-Intersection Coordination:} Scaling the system to manage multiple connected intersections.
+    \item \textbf{Advanced Optimization:} Exploring hybrid algorithms or multi-agent \gls{rl} for more complex network topologies.
+\end{itemize}

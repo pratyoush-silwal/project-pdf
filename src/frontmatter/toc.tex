@@ -1,0 +1,22 @@
+% Table of contents, list of figures, list of tables, and list of algorithms
+
+\renewcommand{\contentsname}{TABLE OF CONTENTS}
+\renewcommand{\listfigurename}{LIST OF FIGURES}
+\renewcommand{\listtablename}{LIST OF TABLES}
+\renewcommand{\listalgorithmname}{LIST OF ALGORITHMS}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+\phantomsection
+\listofalgorithms
+\addcontentsline{toc}{chapter}{LIST OF ALGORITHMS}
+
+% Abbreviation list generated automatically from acronym entries used in the document
+\glsaddall[types={\acronymtype}]
+\printnoidxglossary[type=\acronymtype,title={LIST OF ABBREVIATIONS},style=uniformlist]
+
+% Symbol list generated automatically from glossary symbol entries used in the document
+\glsaddall[types={symbols}]
+\printnoidxglossary[type=symbols,title={LIST OF SYMBOLS},style=uniformlist]

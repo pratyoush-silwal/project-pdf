@@ -1,0 +1,214 @@
+\chapter{System Architecture and Methodology}
+\label{chap:system_architecture_methodology}
+
+% Overview of the DQN-based system design integrating SUMO simulation with reinforcement learning
+\section{System Architecture}
+\label{sec:system_architecture}
+
+The system employs a \gls{dqn} architecture for traffic signal optimization, integrating \gls{sumo} as the simulation environment with a custom reinforcement learning framework. The state representation module processes real-time traffic data including lane vehicle counts and current phase status into a 22-dimensional feature vector (6 incoming lanes, 12 outgoing lanes, and 4 phase indicators). This vector feeds into dual neural networks: a primary network that updates continuously via backpropagation and a target network that stabilizes training through periodic weight synchronization. The networks feature fully connected hidden layers with 128 and 64 neurons designed to capture complex non-linear relationships in traffic states. A replay buffer stores 10,000 experience tuples to enable batch learning and break temporal correlations, while an $\epsilon$-greedy policy balances exploration and exploitation. The action space comprises four discrete traffic signal controls, with rewards calculated based on the Max-Pressure metric (pressure difference between incoming and outgoing lanes). This modular design ensures stable learning while maintaining real-time responsiveness to dynamic traffic conditions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{src/images/figures/system_diagram.jpeg} 
+    \caption{Block Diagram of DQN-Based Traffic Signal Control System}
+    \label{fig:system_block_diagram}
+\end{figure}
+
+% Data sources and field survey methodology used to ground the simulation in real traffic patterns
+\section{Data Analysis}
+\label{sec:data_analysis}
+
+\subsection{Data Collection}
+\label{subsec:data_collection}
+For the traffic network modeling, primary traffic flow data was sourced from the research paper \textit{A Case Study of Thapathali Intersection} by Lav Maharjan \cite{maharjan2023performance}. The data collection methodology involved comprehensive field surveys over a duration of five days, strategically selected to capture both weekday (3 days) and weekend (2 days) traffic characteristics. The observations were conducted continuously from 6:00 AM to 10:15 PM, ensuring the inclusion of morning and evening peak periods as well as off-peak transitions.
+
+The data collected during the surveys were represented in terms of \gls{pcu} \gls{od} data and vehicle counts for different time intervals. \gls{pcu} \gls{od} data was recorded for two specific time intervals: one during the morning peak period and one during the evening peak period, each lasting one hour. These intervals were selected to capture the highest traffic flow during the day. The vehicle counts were recorded separately for these intervals within the given time frame. The representation of the data allows for a clearer analysis of traffic behavior during peak and off-peak times, providing a foundation for modeling the traffic flow more accurately.
+
+\subsection{Data Representation}
+\label{subsec:data_representation}
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Vehicle Class and Adopted PCU Factors}
+    \label{tab:pcu_factors}
+    \begin{tabular}{p{7cm}p{3cm}c}
+        \toprule
+        \textbf{Vehicle Class} & \textbf{Representation} & \textbf{Adopted PCU Factor} \\
+        \midrule
+        Light Vehicle & LV & 1.5 \\
+        Heavy Vehicle & HV & 3 \\
+        Bus & B & 3 \\
+        Mini Bus & MB & 2.5 \\
+        Micro Bus & MIB & 1.5 \\
+        Car & C & 1 \\
+        Four-Wheel & F & 1 \\
+        Tempo & T & 0.75 \\
+        Utility & U & 0.75 \\
+        Two-Wheeler & TW & 0.25 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{OD Data Allocation}
+\label{subsec:od_allocation}
+The vehicle allocation system is implemented using a Python script, leveraging libraries like \texttt{pandas}, \texttt{numpy}, and \texttt{matplotlib} for data manipulation and analysis. The following summarizes the key components of the implementation.
+
+The primary input data consists of:
+\begin{itemize}
+    \item \textbf{Vehicle Count Data (\texttt{vehicle\_count.xlsx}):} Contains the number of vehicles for various vehicle classes during 15-minute intervals.
+    \item \textbf{PCU OD Data (\texttt{pcu\_od.xlsx}):} Provides the proportions of \gls{pcu} allocated to each \gls{od} pair for AM and PM periods.
+\end{itemize}
+
+\subsubsection{Data Cleaning}
+\begin{itemize}
+    \item Non-numeric characters are removed from vehicle count and \gls{pcu} data.
+    \item Invalid data is replaced with zero.
+    \item Data is converted to numeric format for proper calculation and allocation.
+    \item Vehicles with low counts were grouped into similar vehicle types.
+    \item Vehicles with same \gls{pcu} and sizes were grouped into one vehicle type.
+\end{itemize}
+
+\subsubsection{Vehicle Allocation Process}
+For each vehicle class and \gls{od} pair, the following process is followed:
+\begin{itemize}
+    \item \textbf{Proportions Calculation:} AM and PM proportions are calculated based on the \gls{pcu} data.
+    \item \textbf{Allocation via Largest Remainder Method:} Vehicles are initially allocated proportionally, and leftover vehicles are distributed to ODs with the largest fractional values.
+    \item \textbf{Piecewise Interpolation:} For each 15-minute interval, vehicle proportions are dynamically interpolated using piecewise interpolation.
+\end{itemize}
+
+\subsubsection{Maternity Restrictions}
+For certain ODs related to maternity, only specific vehicle classes are allowed (\eg cars, two-wheelers, four-wheel vehicles, and utility vehicles), based on real-world traffic constraints.
+
+\subsubsection{Output Generation}
+The final allocated vehicle counts are saved to Excel files, including:
+\begin{itemize}
+    \item 15-minute interval counts for every \gls{od} and vehicle class.
+    \item A summary sheet showing total vehicles and AM/PM proportions.
+    \item A verification sheet ensuring correct and consistent allocation.
+\end{itemize}
+
+\section{Environment Setup for Traffic Simulation}
+\label{sec:env_setup}
+
+The first step in the environment setup for traffic simulation using \gls{sumo} was to use the NETEDIT tool to create a road network that accurately represents the Thapathali intersection. This tool allows for the design of road networks, including multiple lanes, junctions, and traffic signals. The geometry of the intersection and road structure was designed in NETEDIT and saved as the \texttt{map.net.xml} file. This file contains the road network's topography, including nodes (junctions), edges (roads), and their connections. It also defines traffic signals at each intersection, which are crucial for simulating realistic traffic flow.
+
+Once the network structure was defined, vehicle movement was modeled using the \texttt{routes.rou.xml} file. This file specifies the routes that vehicles will take through the network and includes information such as departure times, vehicle types, and flow. The vehicle flow is generated to ensure that vehicles enter the network at regular intervals, with a preference for the least congested lane, thus simulating realistic driving behavior.
+
+The \texttt{vtypes.xml} file defines various vehicle types used in the simulation, each with specific attributes such as length, maximum speed, acceleration, and deceleration. These characteristics are essential for accurately simulating vehicle behavior across different classes.
+
+The \texttt{flows.xml} file captures vehicle flow data and traffic signal phases. This file defines how many vehicles pass through each edge of the network in specific time intervals and the corresponding traffic signal phases.
+
+To interact with the simulation in real-time, the \gls{traci} interface is used. This allows external scripts to control the simulation, modifying vehicle flows and traffic signal phases dynamically. A Python script adjusts the signal phases based on real-time data, such as vehicle counts and congestion levels.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{src/images/figures/sumoenviroment.jpeg}
+    \caption{SUMO Environment Block Diagram}
+    \label{fig:sumo_env_diagram}
+\end{figure}
+
+% Design of the DQN agent including state vector, action space, reward shaping, and network layers
+\section{DQN Agent Development}
+\label{sec:dqn_development}
+
+\subsection{State Representation}
+\noindent The \gls{dqn} agent observed key traffic conditions, including vehicle counts on each lane, queue lengths, current traffic signal phases, and vehicle waiting times. These parameters were combined into a 22-dimensional state vector:
+\[
+s_t = \bigl[ 
+\underbrace{n_1, n_2, \dots, n_{in}}_{\text{Incoming Counts}}, \;
+\underbrace{n_{out,1}, \dots, n_{out,m}}_{\text{Outgoing Counts}}, \;
+\underbrace{0, 1, 0, 0}_{\text{Current Phase}}
+\bigr]
+\]
+
+\subsection{Action Space}
+\noindent The agent selects from four predefined traffic signal phases. Each phase remains green for 15 seconds, followed by a 3-second yellow transition:
+\begin{itemize}
+    \item \textbf{Action 1:} Straight movements between Maitighar and Kupondole.
+    \item \textbf{Action 2:} Right turn from Maitighar to Tripureshwor + Maitighar to Kupondole.
+    \item \textbf{Action 3:} Straight from Tripureshwor to Maternity + Maternity left movements.
+    \item \textbf{Action 4:} Right from Kupondole to Maternity + Maitighar straight movements.
+\end{itemize}
+
+\subsection{Reward Function}
+\noindent A reward function based on Max-Pressure Theory was used. Pressure was calculated as the difference between incoming and outgoing vehicle densities:
+\begin{equation}
+R = -\sum_{i \in L_{\text{in}}} \left( w(i) - \frac{1}{|L_{\text{out}}|} \sum_{j \in L_{\text{out}}} w(j) \right) - \lambda \times (\text{max waiting time})
+\end{equation}
+
+\subsection{Neural Network Architecture}
+\noindent The agent uses a deep neural network with an input layer, two hidden layers (128 and 64 neurons), and an output layer for action values.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{src/images/figures/NN.png}
+    \caption{Neural Network Architecture for Q-value Prediction}
+    \label{fig:nn_architecture}
+\end{figure}
+
+% Training loop covering epsilon-greedy exploration, experience replay, and target network updates
+\section{Training Process}
+\label{sec:training_process}
+
+\subsection{Learning Strategy}
+\noindent An $\epsilon$-greedy strategy was used. The agent initially explored the environment ($\epsilon = 1.0$) and gradually reduced $\epsilon$ to 0.01 to favor exploitation of learned strategies.
+
+\subsection{Experience Replay}
+\noindent Experience replay improved stability by storing transitions in a 10,000-capacity buffer. Random samples were used for training to break temporal correlations.
+
+\subsection{Training Loop}
+\noindent The model was trained over 500 episodes. The process included:
+\begin{enumerate}
+    \item Calculate Target Q: $Q_{\text{target}} = r + \gamma \times \max(Q(s', a'))$.
+    \item Calculate Current Q: $Q_{\text{current}} = Q(s, a)$.
+    \item Backpropagate Loss: $\text{MSE}(Q_{\text{target}}, Q_{\text{current}})$.
+    \item Update policy network weights.
+\end{enumerate}
+
+% Pseudocode for the max-pressure reward calculation and the DQN training procedure
+\section{Algorithms Used}
+\label{sec:algorithms}
+
+\begin{algorithm}
+\caption{Max-Pressure Reward Calculation}
+\label{alg:max_pressure_reward}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Incoming/Outgoing lane vehicle counts
+\State \textbf{Output:} Reward value
+\Procedure{CalculateMaxPressureReward}{}
+    \State $total\_pressure \gets 0$
+    \ForAll{$incoming\_lane \in incoming\_lanes$}
+        \State $incoming\_count \gets \text{CountVehiclesWaiting}(incoming\_lane)$
+        \State $outgoing\_average \gets \text{CalculateAverageOutgoingTraffic}()$
+        \State $pressure \gets incoming\_count - outgoing\_average$
+        \State $total\_pressure \gets total\_pressure + pressure$
+    \EndFor
+    \State $reward \gets -total\_pressure - \lambda \times (max\_waiting\_time)$
+    \State \Return $reward$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{DQN Training Process}
+\label{alg:dqn_training_algo}
+\begin{algorithmic}[1]
+\Procedure{TrainDQN}{$E, B, F$}
+    \State Initialize $\epsilon \gets 1.0, \epsilon_{min} \gets 0.01, \epsilon_{decay} \gets 0.995$
+    \State Initialize replay buffer and networks
+    \For{$episode \gets 1$ \textbf{to} $E$}
+        \State Reset environment and get $state$
+        \While{simulation is running}
+            \State $action \gets \text{SelectAction}(state, \epsilon)$
+            \State Execute $action$, observe $reward$ and $next\_state$
+            \State Store $(state, action, reward, next\_state)$ in buffer
+            \If{buffer has enough samples}
+                \State Train Q-network using random batch
+            \EndIf
+            \State $state \gets next\_state$
+        \EndWhile
+        \State Update $\epsilon$ and periodically sync target network
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}

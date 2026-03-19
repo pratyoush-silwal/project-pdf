@@ -1,0 +1,125 @@
+\chapter{Results and Analysis}
+\label{chap:results_and_analysis}
+
+% Description of the simulation setup used to generate performance results
+\section{Simulation Environment Configuration}
+\label{sec:simulation_config}
+
+The \gls{dqn}-based traffic signal control system was implemented using a realistic simulation of the Thapathali intersection in \gls{sumo}. The environment was constructed using OpenStreetMap data and calibrated with Origin-Destination (OD) patterns collected from field studies. As shown in \cref{fig:simulation_environment}, the simulation accurately represents the four major approaches: \textbf{Maitighar, Kupondole, Tripureshwor, and Maternity}, with proper lane configurations and traffic signal placements.
+
+The simulation incorporated diverse vehicle types using \gls{pcu} factors from empirical studies, and traffic demand was generated using the allocation algorithms detailed in \cref{chap:implementation_details}. The \gls{dqn} agent underwent training over 500 episodes with an exploration rate decaying from 1.0 to 0.01, utilizing the Max-Pressure reward function to optimize congestion management.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{src/images/figures/r5.png}
+    \caption{SUMO Simulation Environment of Thapathali Intersection}
+    \label{fig:simulation_environment}
+\end{figure}
+
+% Quantitative comparison of DQN controller versus fixed-time baseline on key traffic metrics
+\section{Performance Comparison Results}
+\label{sec:performance_comparison}
+
+The \gls{dqn}-based controller demonstrated significant superiority over the conventional fixed-time system, achieving \textbf{8.28\% higher effectiveness} in congestion mitigation. While both systems operated under identical high-congestion conditions at the Thapathali intersection, the \gls{dqn} agent uniquely exhibited the capacity to occasionally improve traffic conditions—a capability absent in the fixed-time approach.
+
+\textbf{Key Quantitative Outcomes:}
+\begin{itemize}
+    \item \textbf{Throughput Enhancement:} 3.07\% increase in total vehicles processed
+    \item \textbf{Queue Length Reduction:} 11.63\% decrease in average queue length
+    \item \textbf{Reward Improvement:} 10.35\% better cumulative performance
+\end{itemize}
+
+% Step-wise reward progression showing the DQN agent learning over action steps
+\section{Reward Analysis and Learning Trajectory}
+\label{sec:reward_analysis}
+
+The reward comparison reveals distinct learning patterns between the two control methods. Both systems initially show negative rewards due to baseline congestion, but the \gls{dqn} agent begins outperforming the fixed-time controller after approximately 20 action steps. By the 100th step, the \gls{dqn} maintains an \textbf{8000-unit advantage} in cumulative reward (-10,000 vs -18,000 for fixed-time), demonstrating effective learning of congestion management strategies.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{src/images/figures/r1.png}
+    \caption{Step-wise Reward Comparison: DQN vs Fixed-time Control}
+    \label{fig:stepwise_reward}
+\end{figure}
+
+% Cumulative reward curves showing long-term divergence between DQN and fixed-time methods
+\section{Cumulative Performance Evaluation}
+\label{sec:cumulative_evaluation}
+
+The cumulative reward analysis provides insights into long-term system effectiveness. The \gls{dqn} agent not only achieves higher individual rewards but also accumulates significantly better performance over time. The progressive divergence between the two performance curves indicates that the \gls{dqn}'s adaptive policy becomes increasingly effective as traffic conditions evolve, while the fixed-time system remains static and unresponsive to changing demands.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{src/images/figures/r2.png}
+    \caption{Cumulative Reward Performance Over Time}
+    \label{fig:cumulative_performance}
+\end{figure}
+
+% Statistical distribution of rewards comparing mean, variance, and range for both control methods
+\section{Statistical Performance Distribution}
+\label{sec:statistical_distribution}
+
+Statistical analysis reveals important characteristics of both control methods. The \gls{dqn} agent achieves a mean reward of -230 compared to -250 for fixed-time control, representing an 8\% improvement. Both systems exhibit similar standard deviations (100 units), indicating comparable stability in performance. Notably, the \gls{dqn} demonstrates a broader performance range with maximum rewards reaching +3, while fixed-time control is limited to +2, suggesting the \gls{dqn}'s potential for achieving positive traffic outcomes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{src/images/figures/r4.png}
+    \caption{Statistical Comparison of Performance Metrics}
+    \label{fig:statistical_metrics}
+\end{figure}
+
+% Queue length trends demonstrating the DQN agent's ability to prevent congestion buildup
+\section{Queue Management Effectiveness}
+\label{sec:queue_management}
+
+Queue length analysis demonstrates the \gls{dqn} agent's superior congestion management capabilities. Throughout the simulation, the \gls{dqn} maintains 20--30\% lower queue lengths compared to fixed-time control. Critical performance thresholds reveal significant improvements:
+\begin{itemize}
+    \item At step 100: \gls{dqn} maintains 22 vehicles vs 100 for fixed-time (78\% reduction)
+    \item At step 200: \gls{dqn} maintains 42 vehicles vs 200 for fixed-time (79\% reduction)
+    \item At step 250: \gls{dqn} maintains 50 vehicles vs 250 for fixed-time (80\% reduction)
+\end{itemize}
+This consistent performance advantage demonstrates the \gls{dqn}'s effectiveness in preventing exponential queue buildup and potential intersection gridlock.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{src/images/figures/r6.jpeg}
+    \caption{Queue Length Comparison: DQN vs Fixed-time Control}
+    \label{fig:queue_comparison}
+\end{figure}
+
+% Probability density analysis of reward values for both control strategies
+\section{Reward Distribution Patterns}
+\label{sec:reward_patterns}
+
+The reward distribution analysis provides insights into the behavioral characteristics of both control methods. Fixed-time control exhibits a concentrated distribution around the -200 to -300 range with limited variance, indicating predictable but suboptimal performance. In contrast, the \gls{dqn} agent shows a broader distribution from -370 to +3, with higher frequency in the -200 to -250 performance band. This pattern suggests that while the \gls{dqn} occasionally experiences lower rewards during exploration phases, it more consistently achieves superior performance levels.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{src/images/figures/r3.png}
+    \caption{Reward Distribution Patterns of Both Control Methods}
+    \label{fig:reward_distribution}
+\end{figure}
+
+% Summary of experimental findings and their practical implications for real-world deployment
+\section{Conclusion and Practical Implications}
+\label{sec:results_conclusion}
+
+The experimental results conclusively demonstrate that the \gls{dqn}-based adaptive traffic signal controller significantly outperforms conventional fixed-time control at the Thapathali intersection. Key achievements include 8.28\% higher congestion mitigation effectiveness, 11.63\% queue reduction, and 3.07\% throughput improvement. These results validate \gls{drl} as a viable approach for urban traffic management in dynamic environments.
+
+\textbf{Practical Benefits for Thapathali Intersection:}
+\begin{itemize}
+    \item Reduced commuter delays through improved queue management
+    \item Lower environmental impact via decreased vehicle idling
+    \item Enhanced operational efficiency during peak traffic periods
+    \item Reduced dependency on manual traffic police intervention
+\end{itemize}
+
+\textbf{System Limitations and Future Directions:}
+\begin{itemize}
+    \item Adaptation delay of 2--3 cycles for sudden traffic surges
+    \item Dependence on training data quality and representativeness
+    \item Exclusion of pedestrian and emergency vehicle considerations
+    \item Computational requirements for training and deployment
+\end{itemize}
+
+The \gls{dqn} agent's demonstrated ability to learn and adapt to real-time traffic conditions presents a robust solution for dynamic traffic management, offering significant potential for congestion reduction in complex urban intersections like Thapathali.

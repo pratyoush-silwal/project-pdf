@@ -1,0 +1,11 @@
+
+% Sample acronym definitions for demonstration purposes only
+
+\newacronym{latex}{LaTeX}{Lamport LaTeX}
+\newacronym{html}{HTML}{HyperText Markup Language}
+\newacronym{css}{CSS}{Cascading Style Sheets}
+
+% Render the abbreviation list as an unnumbered chapter included in the table of contents
+\chapter*{List of Abbreviations}
+\addcontentsline{toc}{chapter}{List of Abbreviations}
+\printnoidxglossary[type=\acronymtype]

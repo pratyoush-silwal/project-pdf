@@ -1,0 +1,257 @@
+\chapter{Implementation Details}
+\label{chap:implementation_details}
+
+% Summary of the DQN-based approach for adaptive traffic signal control at Thapathali
+This project focuses on developing an intelligent traffic control system using \gls{dqn} to optimize traffic flow at the Thapathali Intersection in Kathmandu. By applying \gls{dqn}, the system dynamically adjusts traffic light phases based on real-time data such as vehicle density, waiting times, and congestion levels. The primary objective is to minimize vehicle wait times and enhance traffic throughput by learning and implementing the most efficient signal phases.
+
+The system utilizes \gls{sumo} for simulating traffic scenarios and \gls{traci} to enable real-time interaction between the \gls{dqn} model and the traffic simulation. This integration allows the \gls{dqn} model to control traffic signal phases, assess the impact of its actions, and continuously improve the traffic flow based on the simulation feedback.
+
+% Algorithms for distributing vehicle counts across origin-destination pairs using proportional allocation
+\section{Vehicle Flow Generation}
+\label{sec:vehicle_flow_generation}
+
+\begin{algorithm}
+\caption{Perfect Vehicle Allocation with Remainder Tracking}
+\label{alg:perfect_allocation}
+\begin{algorithmic}[1]
+\State \textbf{Input:}
+\State $\quad vehicle\_counts$: Dictionary $\{vc_1: count_1, vc_2: count_2, \dots\}$
+\State $\quad proportions$: Dictionary $\{od_1: p_1, od_2: p_2, \dots\}$
+\State $\quad od\_names$: List of OD names $[od_1, od_2, \dots, od_N]$
+\State $\quad prev\_remainders$: Dictionary $\{od_1: r_1, od_2: r_2, \dots\}$ (Optional)
+
+\State \textbf{Output:}
+\State $\quad allocation$: Dictionary $\{od_1: \{vc_1: count, \dots\}, \dots\}$
+\State $\quad new\_remainders$: Dictionary $\{od_1: r_1, od_2: r_2, \dots\}$
+
+\Procedure{AllocateIntervalPerfect}{$vehicle\_counts$, $proportions$, $od\_names$, $prev\_remainders$}
+    \If{$prev\_remainders$ is None}
+        \State Initialize $prev\_remainders \gets \{od: 0 \text{ for all } od \in od\_names\}$
+    \EndIf
+    
+    \State Initialize $allocation \gets \{od: \{\} \text{ for all } od \in od\_names\}$
+    \State Initialize $new\_remainders \gets \{od: 0 \text{ for all } od \in od\_names\}$
+    
+    \ForAll{$(vehicle\_class, total\_count) \in vehicle\_counts$}
+        \If{$total\_count = 0$}
+            \State \textbf{continue}
+        \EndIf
+        
+        \ForAll{$od \in od\_names$}
+            \State $exact \gets total\_count \times proportions[od] + prev\_remainders[od]$
+            \State $allocated \gets \lfloor exact \rfloor$
+            \State $remainder \gets exact - allocated$
+            
+            \State $allocation[od][vehicle\_class] \gets allocated$
+            \State $new\_remainders[od] \gets remainder$
+        \EndFor
+    \EndFor
+    
+    \State \Return $(allocation, new\_remainders)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Batch Perfect Allocation (No Time Interpolation)}
+\label{alg:batch_perfect}
+\begin{algorithmic}[1]
+\Procedure{AllocateVehiclesPerfect}{$vehicle\_counts$, $proportions$, $od\_names$}
+    \State Initialize $result \gets \{od: \{vc: 0 \text{ for all } vc\} \text{ for all } od \in od\_names\}$
+    
+    \ForAll{$(vehicle\_class, total\_count) \in vehicle\_counts$}
+        \If{$total\_count = 0$}
+            \State \textbf{continue}
+        \EndIf
+        
+        \State $targets \gets \{\}$ \Comment{Exact target allocations}
+        \ForAll{$od \in od\_names$}
+            \State $targets[od] \gets total\_count \times proportions[od]$
+        \EndFor
+        
+        \State \Comment{Step 1: Allocate integer parts}
+        \State $allocated \gets \{\}$
+        \State $fractions \gets \{\}$
+        \ForAll{$od \in od\_names$}
+            \State $allocated[od] \gets \lfloor targets[od] \rfloor$
+            \State $fractions[od] \gets targets[od] - allocated[od]$
+        \EndFor
+        
+        \State $total\_allocated \gets \sum_{od \in od\_names} allocated[od]$
+        \State $remaining \gets total\_count - total\_allocated$
+        
+        \If{$remaining > 0$}
+            \State \Comment{Step 2: Sort ODs by fractional part (descending)}
+            \State $sorted\_ods \gets \text{SORT}(fractions.items(), \text{by value descending})$
+            
+            \For{$i \gets 0$ \textbf{to} $\min(remaining, |od\_names|) - 1$}
+                \State $od \gets sorted\_ods[i].key$
+                \State $allocated[od] \gets allocated[od] + 1$
+            \EndFor
+        \EndIf
+        
+        \State \Comment{Store final allocation for this vehicle class}
+        \ForAll{$od \in od\_names$}
+            \State $result[od][vehicle\_class] \gets allocated[od]$
+        \EndFor
+    \EndFor
+    
+    \State \Return $result$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Mathematical Formulation}
+\label{alg:mathematical_formulation}
+\textbf{AllocateIntervalPerfect:}
+\begin{align*}
+\text{Given:} & \quad v_c \text{ (vehicles of class } c\text{), } p_n \text{ (proportion for OD } n\text{), } r_n^{prev} \text{ (previous remainder)} \\
+\text{Compute:} & \quad exact_n = v_c \cdot p_n + r_n^{prev} \\
+& \quad a_n = \lfloor exact_n \rfloor \\
+& \quad r_n^{new} = exact_n - a_n \\
+\text{Result:} & \quad \sum_{n} a_n = v_c \text{ (when summed over all classes with remainder tracking)}
+\end{align*}
+
+\textbf{AllocateVehiclesPerfect (Largest Remainder Method):}
+\begin{align*}
+\text{Given:} & \quad v_c \text{ (total vehicles of class } c\text{), } p_n \text{ (proportion for OD } n\text{)} \\
+\text{Step 1:} & \quad a_n^{(1)} = \lfloor v_c \cdot p_n \rfloor \\
+& \quad f_n = v_c \cdot p_n - a_n^{(1)} \\
+\text{Step 2:} & \quad \text{Sort } \{f_n\} \text{ in descending order} \\
+\text{Step 3:} & \quad a_n = a_n^{(1)} + 
+\begin{cases}
+1 & \text{if } n \text{ is among top } R \text{ ODs} \\
+0 & \text{otherwise}
+\end{cases} \\
+\text{Where:} & \quad R = v_c - \sum_{n} a_n^{(1)}
+\end{align*}
+
+\textbf{Conservation Property:}
+\[
+\sum_{n=1}^{N} a_n = v_c \quad \forall c
+\]
+\end{algorithm}
+
+% Configuration of SUMO simulation files for network topology, routes, and vehicle types
+\section{Traffic Simulation Environment (SUMO)}
+\label{sec:sumo_environment}
+
+To simulate the traffic environment and test our \gls{dqn}-based traffic signal control system, we used \gls{sumo}, an open-source tool for traffic modeling. Below are the steps and configurations involved in setting up the simulation.
+
+\subsection{SUMO Configuration Files}
+\label{subsec:sumo_config}
+The implementation of \gls{sumo} environment involved the fine-tuning of various parameters to optimize the traffic signal control for the Thapathali intersection. The following parameters were modified or explicitly set in the \gls{sumo} configuration files. All parameters that were not explicitly specified or tuned in the configuration files default to \gls{sumo}'s standard settings. This ensures that the simulation remains consistent with \gls{sumo}'s standard behavior while allowing for the fine-tuning and optimization necessary for this project \cite{SUMO2025}.
+
+\subsection{\texttt{map.net.xml}}
+\label{subsec:map_net_xml}
+This file is generated by NETEDIT and contains the road network's topology. It defines the layout of roads (edges) and intersections (nodes), including information such as lanes, traffic signals, and the geometry of the road network and left-side driving was enabled.
+
+\subsection{\texttt{routes.rou.xml}}
+\label{subsec:routes_rou_xml}
+This file defines the vehicle routes and traffic flow in the simulation. It specifies how many vehicles will be on the road and the routes they take through the network.
+
+\subsection{\texttt{vtypes.xml}}
+\label{subsec:vtypes_xml}
+This file specifies the characteristics of different vehicle types used in the simulation. Each \texttt{<vType>} tag describes a vehicle's properties, such as length, width, acceleration, deceleration, maximum speed, and other factors relevant to vehicle behavior in the simulation.
+
+\begin{itemize}
+    \item \textbf{vClass:} Specifies the type of vehicle (\eg "delivery", "truck", "bus", "passenger", "evehicle", "motorcycle").
+    \item \textbf{length:} The length of the vehicle in meters.
+    \item \textbf{width:} The width of the vehicle in meters.
+    \item \textbf{accel:} The vehicle's acceleration in \unit{m/s^2}.
+    \item \textbf{decel:} The vehicle's deceleration rate in \unit{m/s^2}.
+    \item \textbf{emergencyDecel:} The emergency deceleration rate in \unit{m/s^2}.
+    \item \textbf{maxSpeed:} The vehicle's maximum speed in \unit{m/s}.
+    \item \textbf{minGap:} The minimum gap between vehicles in meters.
+    \item \textbf{guiShape:} Specifies the visual representation of the vehicle.
+    \item \textbf{sigma:} Influences the vehicle's randomness in lane-changing behavior.
+    \item \textbf{tau:} Represents the reaction time of the vehicle.
+\end{itemize}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Vehicle Type Configurations in SUMO Simulation}
+    \label{tab:vehicle_types}
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Attribute} & \textbf{LV} & \textbf{HV} & \textbf{B} & \textbf{MB} & \textbf{MIB} \\
+        \midrule
+        Class & Delivery & Truck & Bus & Bus & Delivery \\
+        Length (m) & 6.2 & 8.0 & 10.85 & 6.6 & 5.4 \\
+        Width (m) & 2.16 & 2.4 & 2.5 & 2.2 & 2.0 \\
+        Acceleration (\unit{m/s^2}) & 2.6 & 1.3 & 1.2 & 2.6 & 2.6 \\
+        Deceleration (\unit{m/s^2}) & 4.5 & 4.0 & 4.0 & 4.5 & 4.5 \\
+        Emergency Decel (\unit{m/s^2}) & 7.0 & 7.0 & 7.0 & 9.0 & 9.0 \\
+        Max Speed (\unit{m/s}) & 6.14 & 4.83 & 4.83 & 5.66 & 5.66 \\
+        Min Gap (m) & 1 & 1.5 & 1.5 & 1 & 1 \\
+        Sigma & 0.4 & 0.2 & 0.3 & 0.4 & 0.4 \\
+        Tau & 1.5 & 3.0 & 2.5 & 2.0 & 1.5 \\
+        GUI Shape & Delivery & Truck & Bus & Bus & Delivery \\
+        \midrule
+        \textbf{Attribute} & \textbf{C} & \textbf{F} & \textbf{U} & \textbf{T} & \textbf{TW} \\
+        \midrule
+        Class & Passenger & Passenger & Electric Vehicle & Delivery & Motorcycle \\
+        Length (m) & 4.0 & 4.6 & 4.6 & 3.6 & 1.8 \\
+        Width (m) & 1.8 & 1.8 & 1.8 & 1.6 & 0.9 \\
+        Acceleration (\unit{m/s^2}) & 2.6 & 2.6 & 2.6 & 2.6 & 6.0 \\
+        Deceleration (\unit{m/s^2}) & 4.5 & 4.5 & 4.5 & 4.5 & 10.0 \\
+        Emergency Decel (\unit{m/s^2}) & 9.0 & 9.0 & 9.0 & 9.0 & 10.0 \\
+        Max Speed (\unit{m/s}) & 6.86 & 6.14 & 6.86 & 7.88 & 9.25 \\
+        Min Gap (m) & 1 & 1 & 1 & 1 & 1 \\
+        Sigma & 0.5 & 0.5 & 0.5 & 0.3 & 0.6 \\
+        Tau & 1.2 & 1.2 & 1.4 & 1.2 & 1.0 \\
+        GUI Shape & Passenger & Passenger & Electric Vehicle & Delivery & Motorcycle \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{\texttt{flows.xml}}
+\label{subsec:flows_xml}
+In our simulation, the \texttt{departLane="best"} parameter was employed to ensure that vehicles are assigned to the most optimal lane when they enter the network. This helps to improve the overall efficiency of the traffic flow by minimizing congestion and ensuring that vehicles are distributed across available lanes in an optimal manner.
+
+Additionally, a uniform vehicle generation pattern was applied, with vehicles entering the network in 15-minute intervals. This ensures that traffic flow is consistent and realistic, mirroring typical traffic patterns observed during peak hours while maintaining a balanced vehicle entry rate across the simulation period.
+
+\subsection{\texttt{simulation.sumocfg} (SUMO Configuration File)}
+\label{subsec:sumocfg}
+The \gls{sumo} configuration file defines the simulation parameters, such as which files to use (network, route, vtype, flows, and add), the simulation duration, and various settings for the simulation itself.
+The lateral-resolution parameter in the \gls{sumo} configuration file (\texttt{.sumocfg}) is used to define the resolution at which the lanes are subdivided during the simulation. It specifies the width of the lane in terms of the vehicle's lateral position. This value is particularly important for controlling the precision of lane-changing behavior, vehicle positioning, and simulation accuracy in \gls{sumo}.
+
+To ensure high accuracy in vehicle positioning and lane-changing behavior, a lateral resolution of 0.2 meters was used in the \gls{sumo} simulation.
+
+% Implementation of the SUMO-to-agent interface handling state extraction, reward computation, and phase control
+\section{Environment Wrapper Implementation}
+\label{sec:env_wrapper}
+
+The \texttt{SumoEnvironment} class provided the interface between \gls{sumo} simulation and the reinforcement learning agent. The \texttt{reset()} method initialized each episode by restarting the simulation. The \texttt{step(action)} method executed traffic signal actions with proper phase timing. The \texttt{\_get\_state()} method extracted vehicle counts from incoming and outgoing lanes. The \texttt{\_calculate\_reward()} method computed the Max-Pressure reward by comparing incoming and outgoing vehicle densities. The \texttt{\_set\_phase()} method controlled traffic lights through \gls{sumo}'s \gls{traci} interface.
+
+State representation used 22 dimensions: 6 incoming lane vehicle counts, 12 outgoing lane vehicle counts, and 4 current phase indicators encoded as one-hot vectors. Action space consisted of 4 discrete traffic signal phases with specific movement patterns.
+
+The reward function followed Max-Pressure theory. For each incoming lane, pressure was calculated as incoming vehicle count minus average outgoing vehicle count. The total reward was the negative sum of all lane pressures, encouraging congestion reduction.
+
+Phase execution implemented realistic traffic signal timing: 3 seconds of yellow light for safe transitions followed by 15 seconds of green light. Rewards were averaged over the entire 18-second duration.
+
+% Neural network architecture and learning mechanics of the DQN agent
+\section{DQN Agent Implementation}
+\label{sec:dqn_agent}
+
+The neural network processed 22-dimensional state inputs through two hidden layers: 128 neurons in the first layer and 64 neurons in the second layer, both using \gls{relu} activation. The output layer produced 4 Q-values, one for each possible action.
+
+Two networks were maintained: a Q-network for action selection that updated continuously, and a target network for stable learning targets that updated every 10 episodes. Experience replay stored 10,000 transitions in a circular buffer and randomly sampled batches of 64 for training.
+
+$\epsilon$-greedy exploration started with random actions ($\epsilon = 1.0$) and gradually shifted to exploiting learned Q-values ($\epsilon = 0.01$). Q-learning updates computed current Q-values from the Q-network and target Q-values using rewards plus discounted maximum future Q-values from the target network. Mean squared error between these values was minimized during training.
+
+% Episode-level training loop, checkpoint saving, and epsilon decay schedule
+\section{Training Pipeline Implementation}
+\label{sec:training_pipeline}
+
+Training ran for 500 episodes. Each episode followed this sequence: reset simulation, observe initial state, select action using $\epsilon$-greedy policy, apply yellow phase when switching, execute green phase, collect reward, observe next state, store experience in replay buffer, train on random batch if available, update state.
+
+Between episodes, $\epsilon$ decayed by multiplying by 0.995. Every 10 episodes, the target network updated its weights, and model checkpoints were saved. Outputs included periodic checkpoints, a final trained model, and training visualizations.
+
+% Centralized configuration file managing hyperparameters, file paths, and phase definitions
+\section{Configuration Management}
+\label{sec:config_management}
+
+A central configuration file managed all parameters: training settings (episodes, learning rate, batch size), \gls{dqn} hyperparameters ($\epsilon$ decay, discount factor, replay buffer size), traffic light identifiers and phase definitions, \gls{sumo} file paths, and action durations (yellow: 3s, green: 15s).

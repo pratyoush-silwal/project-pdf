@@ -1,0 +1,75 @@
+
+
+\chapter{Requirements Analysis}
+\label{chap:requirements_analysis}
+
+% Functional capabilities that the traffic control system must provide
+\section{Functional Requirements}
+\label{sec:functional_requirements}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Functional Requirements for the Project}
+    \label{tab:functional_requirements}
+    \begin{tabular}{cp{12cm}}
+        \toprule
+        \textbf{ID} & \textbf{Description} \\
+        \midrule
+        FR-001 & The system shall import the Thapathali intersection map from OpenStreetMap and configure it in \gls{sumo} with realistic traffic patterns. \\
+        FR-002 & The system shall implement a \gls{dqn}-based agent capable of changing traffic signal phases to optimize traffic flow. \\
+        FR-003 & The system shall update the \gls{dqn} target network periodically to facilitate stable real-time learning. \\
+        FR-004 & The system shall accept traffic state inputs including vehicle counts, queue lengths, and waiting times. \\
+        FR-005 & The system shall output traffic light control commands via \gls{traci} based on the \gls{dqn} agent's decisions. \\
+        FR-006 & The system shall log key performance metrics (\eg queue length, throughput) for post-simulation analysis. \\
+        FR-007 & The system shall visualize simulation progress via \gls{sumo}-GUI for monitoring purposes. \\
+        FR-008 & The system shall allow comparative evaluation against baseline fixed-time or actuated signal plans. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% Non-functional quality attributes and operational constraints
+\section{Non-Functional Requirements}
+\label{sec:non_functional_requirements}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Non-Functional Requirements for the Project}
+    \label{tab:non_functional_requirements}
+    \begin{tabular}{cp{2.5cm}p{9cm}}
+        \toprule
+        \textbf{ID} & \textbf{Category} & \textbf{Description} \\
+        \midrule
+        NFR-001 & Performance & The \gls{dqn} agent shall compute and apply a new traffic signal phase within 1 second per simulation step. \\
+        NFR-002 & Performance & The system shall achieve at least \textbf{15--20\% reduction in average waiting time} compared to the baseline signal plan. \\
+        NFR-003 & Performance & The system shall achieve at least \textbf{10\% increase in vehicle throughput} compared to the baseline. \\
+        NFR-004 & Portability & The system shall be fully operational on Windows 10+ and Ubuntu 20.04+. \\
+        NFR-005 & Usability & The system shall provide real-time visualization options (\gls{sumo}-GUI) and clear performance logs. \\
+        NFR-006 & Maintainability & The code shall be modular, well-documented, and follow \gls{pep8} conventions. \\
+        NFR-007 & Security & No personal or sensitive data is processed; only aggregated traffic metrics are used. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% Hardware and software environment needed to run the simulation and training
+\section{System Requirements}
+\label{sec:system_requirements}
+
+\subsection{Hardware Requirements}
+\label{subsec:hardware_requirements}
+\begin{itemize}
+    \item \textbf{Minimum:} 64-bit CPU, 8 GB RAM, 10 GB free disk space.
+    \item \textbf{Recommended:} 4+ core CPU, 16 GB RAM, SSD storage.
+    \item \textbf{Optional (Training):} Dedicated GPU with 4+ GB VRAM or Google Colab access.
+\end{itemize}
+
+\subsection{Software Requirements}
+\label{subsec:software_requirements}
+\begin{itemize}
+    \item \textbf{Operating System:} Windows 10+ or Ubuntu 20.04+.
+    \item \textbf{SUMO:} Eclipse \gls{sumo} 1.26.0 or above.
+    \item \textbf{Python:} 3.8 or higher.
+    \item \textbf{Key Libraries:} \gls{traci}, pandas, PyTorch, NumPy, Matplotlib.
+    \item \textbf{Development Tools:} VS Code, Git, and GitHub.
+\end{itemize}

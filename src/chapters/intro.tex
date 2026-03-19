@@ -1,0 +1,57 @@
+\chapter{Introduction}
+\label{chap:introduction}
+
+% Background on urban traffic congestion at the Thapathali intersection in Kathmandu
+\section{Background}
+\label{sec:background}
+
+In urban cities like Kathmandu, traffic congestion is a growing problem, causing wasted time, pollution, and economic loss. Currently, in Kathmandu, traffic is monitored through cameras, and signal timings are set manually based on these observations or managed manually by traffic police. However, these methods are not very effective; instead of reducing congestion, they often cause additional delays because this system often fails during sudden surges, accidents, or unusual traffic patterns. This limitation highlights the need for more intelligent, adaptive traffic management systems. Since most delays originate at major junctions, this project focuses specifically on improving intersection-level signal control at the Thapathali intersection rather than addressing city-wide traffic management.
+
+% Rationale for applying deep reinforcement learning to traffic signal optimization
+\section{Motivation}
+\label{sec:motivation}
+
+The daily commute in Kathmandu, particularly around busy intersections like Thapathali, has long been a source of frustration for its residents. Traffic congestion is a persistent issue, especially as the city continues to grow and traffic patterns become increasingly unpredictable. Conventional traffic control methods, which rely on fixed patterns and limited flexibility, are proving insufficient to address the dynamic and often chaotic nature of Kathmandu's roadways. As the city's population expands and the number of vehicles on the road increases, the need for a more intelligent and adaptive approach to traffic signal control becomes critical.
+
+This project seeks to tackle the limitations of traditional traffic management systems by employing the power of \gls{drl}. The aim is to develop an adaptive traffic signal control framework that can dynamically respond to real-time traffic conditions, improving traffic efficiency, reducing congestion, and making daily commutes smoother for the people of Kathmandu, especially around congested areas like Thapathali.
+
+To test and validate this approach, we turn to advanced simulation tools like \gls{sumo}, which offers a scalable and safe platform for replicating real-world traffic scenarios. With accurate road network data from \gls{osm}, \gls{sumo} allows us to simulate the conditions in Kathmandu and evaluate AI-based traffic control strategies. This simulation environment provides an ideal space to refine the system before real-world implementation.
+
+% Definition of the core problem and the DQN-based hypothesis to address it
+\section{Problem Statement}
+\label{sec:problem_statement}
+
+Current Thapathali intersection traffic signal systems are largely static or semi-adaptive, failing to respond effectively to complex and fluctuating traffic patterns. This leads to increased vehicle waiting times and travel delays, higher fuel consumption and air pollution, and inefficient coordination across intersections. The problem this project addresses is how to design a traffic signal control system that can adapt in real-time to dynamic traffic conditions, using a learning-based approach to optimize flow, minimize delays, and improve overall intersection throughput.
+
+A \gls{dqn}-based traffic signal controller is expected to reduce average waiting time and queue length compared to fixed-time control under realistic Thapathali traffic demand because it can continuously adjust phase selection and green allocation based on real-time traffic states (\eg queue lengths, waiting times, current phase, and elapsed duration). Unlike fixed-time plans that rely on pre-set splits and cannot respond to demand fluctuations, asymmetric approach volumes, or sudden surges, the \gls{dqn} agent can reduce wasted green time on low-demand approaches, prevent queue buildup and spillback, and improve throughput under the same demand conditions.
+
+% Primary and measurable goals of the project
+\section{Objectives}
+\label{sec:objectives}
+
+\begin{itemize}
+    \item To develop a \gls{dqn}-based \gls{drl} agent for adaptive traffic signal control using \gls{sumo} in a realistic simulation of the Thapathali Intersection.
+    \item To compare the performance of the proposed agent against conventional traffic signal control methods.
+\end{itemize}
+
+% Boundaries of the project and known constraints on the implementation
+\section{Scope and Limitations}
+\label{sec:scope_limitations}
+
+This project focuses on developing a \gls{dqn}-based \gls{drl} agent for adaptive traffic signal control using realistic simulation of the Thapathali intersection. The scope defines what will be covered in the project and sets clear boundaries for its implementation. The intended applications include simulation-based testing of signal timing strategies for a Thapathali intersection, comparative performance analysis against baseline signal plans, and decision support for traffic engineering studies prior to real-world deployment. The proposed system is designed to be scalable; subject to time and data availability, it can be extended to multi-intersection coordination in future work.
+
+\subsection{Scope}
+\label{subsec:scope}
+\begin{itemize}
+    \item To configure the Thapathali intersection map into \gls{sumo} to simulate realistic traffic patterns.
+    \item To design the \gls{dqn}-based \gls{drl} agent with state representations, reward functions, and action spaces.
+    \item To evaluate model performance using metrics such as average waiting time, queue lengths, and vehicle throughput.
+\end{itemize}
+
+\subsection{Limitations}
+\label{subsec:limitations}
+\begin{itemize}
+    \item No hardware implementation or real-world field testing with traffic signals.
+    \item Pedestrians and public transport are excluded in this phase to keep the control problem tractable and focus on vehicle-delay reduction at Thapathali; modeling them requires additional constraints and reliable data.
+    \item Extreme scenarios or multi-modal integration, like ride-sharing or parking systems, are not considered.
+\end{itemize}

@@ -1,0 +1,65 @@
+% Main document entry point for the Thapathali Campus minor project report
+\documentclass[12pt]{thapathaliece}
+
+% Document metadata and globally reused variables such as title, authors, and dates
+\input{vars.tex}
+
+% Additional packages for colored boxes and diagram drawing
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes, arrows}
+
+% Glossary and symbol list definitions loaded before the document body
+\input{src/frontmatter/abbreviations}
+\input{src/frontmatter/symbols}
+
+\begin{document}
+
+% Frontmatter section: title pages, certificates, and preliminary content using roman page numbering
+
+\input{src/frontmatter/_coverBase}
+\input{src/frontmatter/_coverWithSupervisors}
+
+\clearpage
+\pagenumbering{roman}
+
+% Administrative and declaratory pages required by the institution
+%\input{src/frontmatter/certificate}
+%\input{src/frontmatter/declar}
+%\input{src/frontmatter/copyright}
+
+% Enable per-section table and algorithm numbering for precise cross-referencing within chapters
+\counterwithin{table}{section}
+\counterwithin{algorithm}{section}
+
+% Acknowledgement, abstract, and auto-generated document lists
+\input{src/frontmatter/acknow}
+\input{src/frontmatter/abstract}
+\input{src/frontmatter/toc}
+
+% Main content chapters using standard arabic page numbering
+\clearpage
+\pagenumbering{arabic}
+
+% Chapter files covering introduction through conclusion
+\input{src/chapters/intro}
+\input{src/chapters/literatureReview}
+\input{src/chapters/requirements}
+\input{src/chapters/systemArchitectureAndMethodology}
+\input{src/chapters/implementationDetails}
+\input{src/chapters/resultAndAnalysis}
+\input{src/chapters/remainingTasks}
+\input{src/chapters/conclusion}
+
+% Backmatter section: appendices containing supplementary material
+\clearpage
+\appendix
+\addcontentsline{toc}{chapter}{APPENDICES}
+\input{src/backmatter/back.tex}
+
+% Bibliography rendered in IEEE citation style
+\renewcommand{\bibname}{REFERENCES}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
