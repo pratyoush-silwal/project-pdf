@@ -175,7 +175,7 @@ An $\epsilon$-greedy learning strategy was used to balance exploration and explo
 \noindent Experience replay improved stability by storing transitions in a 10,000-capacity buffer. Random samples were used for training to break temporal correlations.
 
 \subsection{Training Loop}
-\noindent The model was trained over 500 episodes. The process included:
+\noindent The model was trained over 300 episodes. The process included:
 \begin{enumerate}
     \item Calculate Target Q: $Q_{\text{target}} = r + \gamma \times \max(Q(s', a'))$.
     \item Calculate Current Q: $Q_{\text{current}} = Q(s, a)$.
@@ -188,45 +188,62 @@ An $\epsilon$-greedy learning strategy was used to balance exploration and explo
 \label{sec:algorithms}
 
 \begin{algorithm}
-\caption{Max-Pressure Reward Calculation}
-\label{alg:max_pressure_reward}
+\caption{Reward Calculation}
 \begin{algorithmic}[1]
-\State \textbf{Input:} Incoming/Outgoing lane vehicle counts
-\State \textbf{Output:} Reward value
-\Procedure{CalculateMaxPressureReward}{}
-    \State $total\_pressure \gets 0$
-    \ForAll{$incoming\_lane \in incoming\_lanes$}
-        \State $incoming\_count \gets \text{CountVehiclesWaiting}(incoming\_lane)$
-        \State $outgoing\_average \gets \text{CalculateAverageOutgoingTraffic}()$
-        \State $pressure \gets incoming\_count - outgoing\_average$
-        \State $total\_pressure \gets total\_pressure + pressure$
+\Require Stopline lane PCU values, Outgoing lane PCU values, Vehicle waiting times
+\Ensure Reward value
+\Procedure{CalculateReward}{}
+    \State $\text{incoming\_pcu} \leftarrow \sum_{l \in L_{\text{stop}}} \text{PCU}(l)$
+    \State $\text{outgoing\_pcu} \leftarrow \sum_{l \in L_{\text{out}}} \text{PCU}(l)$
+    \State $\text{weighted\_wait} \leftarrow 0$
+    \For{all $l \in L_{\text{stop}}$}
+        \For{all $v \in l$}
+            \State $\text{weighted\_wait} \leftarrow \text{weighted\_wait} + \text{PCU}(v) \cdot w^{acc}(v)$
+        \EndFor
     \EndFor
-    \State $reward \gets -total\_pressure - \lambda \times (max\_waiting\_time)$
-    \State \Return $reward$
+    \State $\text{reward} \leftarrow -(\text{incoming\_pcu} - \text{outgoing\_pcu}) - \lambda \cdot \text{weighted\_wait}$
+    \State \Return $\text{reward}$
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
 \caption{DQN Training Process}
-\label{alg:dqn_training_algo}
 \begin{algorithmic}[1]
+\Require Number of episodes $E = 300$, Replay buffer capacity $B = 10000$, 
+         Target network update frequency $F = 10$, Batch size $= 64$
+\Ensure Trained Q-network
 \Procedure{TrainDQN}{$E, B, F$}
-    \State Initialize $\epsilon \gets 1.0, \epsilon_{min} \gets 0.01, \epsilon_{decay} \gets 0.995$
-    \State Initialize replay buffer and networks
-    \For{$episode \gets 1$ \textbf{to} $E$}
-        \State Reset environment and get $state$
+    \State Initialize $\epsilon \leftarrow 1.0$, $\epsilon_{min} \leftarrow 0.01$, $\epsilon_{decay} \leftarrow 0.985$
+    \State Initialize replay buffer with capacity $B$
+    \State Initialize Q-network and target network with random weights
+    \For{$episode \leftarrow 1$ to $E$}
+        \State Reset environment
+        \State $state \leftarrow \text{GetInitialState()}$
         \While{simulation is running}
-            \State $action \gets \text{SelectAction}(state, \epsilon)$
-            \State Execute $action$, observe $reward$ and $next\_state$
-            \State Store $(state, action, reward, next\_state)$ in buffer
-            \If{buffer has enough samples}
-                \State Train Q-network using random batch
+            \State $action \leftarrow \text{SelectAction}(state, \epsilon)$ \Comment{$\epsilon$-greedy selection}
+            \State Execute $action$ for 15 seconds
+            \State $reward \leftarrow \text{CalculateReward()}$
+            \State $next\_state \leftarrow \text{GetNextState()}$
+            \State Store $(state, action, reward, next\_state)$ in replay buffer
+            \If{replay buffer has $\geq 64$ samples}
+                \State Sample random batch of 64 from replay buffer
+                \State Calculate target: $Q_{target} = r + \gamma \times \max_{a'}(Q(s', a'))$
+                \State Calculate current: $Q_{current} = Q(s, a)$
+                \State Compute loss: $\mathcal{L} = \text{MSE}(Q_{target}, Q_{current})$
+                \State Update Q-network weights via backpropagation
             \EndIf
-            \State $state \gets next\_state$
+            \State $state \leftarrow next\_state$
         \EndWhile
-        \State Update $\epsilon$ and periodically sync target network
+        \State $\epsilon \leftarrow \max(\epsilon_{min}, \epsilon \times \epsilon_{decay})$ \Comment{Decay exploration rate}
+        \If{$episode \mod F = 0$}
+            \State Update target network weights from Q-network
+        \EndIf
+        \If{$episode \mod 5 = 0$}
+            \State Save model checkpoint
+        \EndIf
     \EndFor
+    \State \Return trained Q-network
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}

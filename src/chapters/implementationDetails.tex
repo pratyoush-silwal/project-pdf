@@ -53,7 +53,7 @@ The system utilizes \gls{sumo} for simulating traffic scenarios and \gls{traci} 
 \end{algorithm}
 
 \begin{algorithm}
-\caption{Batch Perfect Allocation (No Time Interpolation)}
+\caption{Batch Perfect Allocation using piecewise linear interpolation}
 \label{alg:batch_perfect}
 \begin{algorithmic}[1]
 \Procedure{AllocateVehiclesPerfect}{$vehicle\_counts$, $proportions$, $od\_names$}
@@ -102,7 +102,7 @@ The system utilizes \gls{sumo} for simulating traffic scenarios and \gls{traci} 
 \end{algorithm}
 
 \begin{algorithm}
-\caption{Mathematical Formulation}
+\caption{Mathematical Formulation of largest remainder method for vehicle allocation}
 \label{alg:mathematical_formulation}
 \textbf{AllocateIntervalPerfect:}
 \begin{align*}
@@ -224,13 +224,11 @@ To ensure high accuracy in vehicle positioning and lane-changing behavior, a lat
 \section{Environment Wrapper Implementation}
 \label{sec:env_wrapper}
 
-The \texttt{SumoEnvironment} class provided the interface between \gls{sumo} simulation and the reinforcement learning agent. The \texttt{reset()} method initialized each episode by restarting the simulation. The \texttt{step(action)} method executed traffic signal actions with proper phase timing. The \texttt{\_get\_state()} method extracted vehicle counts from incoming and outgoing lanes. The \texttt{\_calculate\_reward()} method computed the Max-Pressure reward by comparing incoming and outgoing vehicle densities. The \texttt{\_set\_phase()} method controlled traffic lights through \gls{sumo}'s \gls{traci} interface.
+The SumoEnvironment class provided the interface between the SUMO simulation and the reinforcement learning agent. The reset() method initialised each episode by restarting the SUMO simulation and resetting all internal state variables. The step(action) method executed the selected traffic signal action over a 15-second decision window, collecting rewards at each simulation step and returning the averaged reward, next state, and episode metrics upon completion. The \_get\_state() method extracted the 21-dimensional state vector comprising PCU-weighted vehicle loads on origin and outgoing lanes, maximum waiting times on stopline lanes, and a one-hot encoding of the current active phase. The \_calculate\_reward() method computed the reward by comparing stopline PCU against outgoing PCU discharge and adding a PCU-weighted accumulated waiting time penalty. The traffic light phases were controlled through SUMO's TraCI interface, with phase transitions managed internally by the environment.
 
-State representation used 22 dimensions: 6 incoming lane vehicle counts, 12 outgoing lane vehicle counts, and 4 current phase indicators encoded as one-hot vectors. Action space consisted of 4 discrete traffic signal phases with specific movement patterns.
+The state representation used 21 dimensions: 7 origin lane PCU values reflecting approaching traffic volume, 6 stopline lane maximum waiting times capturing queue severity at the signal, 5 outgoing lane PCU values reflecting current discharge flow through the intersection, and 3 phase indicators encoded as one-hot vectors representing the currently active phase (P1, P2, P3). The action space consisted of 2 discrete actions - STAY and NEXT - operating over a cyclic sequence of three signal phases.
 
 The reward function followed Max-Pressure theory. For each incoming lane, pressure was calculated as incoming vehicle count minus average outgoing vehicle count. The total reward was the negative sum of all lane pressures, encouraging congestion reduction.
-
-Phase execution implemented realistic traffic signal timing: 3 seconds of yellow light for safe transitions followed by 15 seconds of green light. Rewards were averaged over the entire 18-second duration.
 
 \section{Traffic Flow at Thapathali Intersection}
 \label{sec:traffic-flow-thapathali}
@@ -334,22 +332,38 @@ To simulate downstream backspill, a random-timer traffic signal with durations o
 \section{DQN Agent Implementation}
 \label{sec:dqn_agent}
 
-The neural network processed 22-dimensional state inputs through two hidden layers: 128 neurons in the first layer and 64 neurons in the second layer, both using \gls{relu} activation. The output layer produced 4 Q-values, one for each possible action.
+The neural network processed 21-dimensional state inputs through three hidden layers: 128 neurons in the first layer, 64 neurons in the second layer, and 32 neurons in the third layer, all using ReLU activation. The output layer produced 2 Q-values, one for each possible action - STAY and NEXT.
 
-Two networks were maintained: a Q-network for action selection that updated continuously, and a target network for stable learning targets that updated every 10 episodes. Experience replay stored 10,000 transitions in a circular buffer and randomly sampled batches of 64 for training.
+Two networks were maintained: a Q-network for action selection that updated continuously during training, and a target network for stable learning targets that updated every 10 episodes by copying the Q-network weights directly. Experience replay stored up to 10,000 transitions in a circular buffer and randomly sampled mini-batches of 64 transitions for each training step, breaking temporal correlations between consecutive experiences and improving learning stability.
 
-$\epsilon$-greedy exploration started with random actions ($\epsilon = 1.0$) and gradually shifted to exploiting learned Q-values ($\epsilon = 0.01$). Q-learning updates computed current Q-values from the Q-network and target Q-values using rewards plus discounted maximum future Q-values from the target network. Mean squared error between these values was minimized during training.
+$\epsilon$-greedy exploration started with fully random actions ($\epsilon = 1.0$) and gradually shifted to exploiting learned Q-values as $\epsilon$ decayed by a factor of 0.985 per episode, reaching a minimum of $\epsilon = 0.01$ by approximately episode 300. Q-learning updates computed current Q-values from the Q-network and target Q-values using the Bellman equation - rewards plus discounted maximum future Q-values from the target network with discount factor $\gamma = 0.95$. Mean squared error between the current and target Q-values was minimised during training using the Adam optimiser with a learning rate of 0.001.
 
 % Episode-level training loop, checkpoint saving, and epsilon decay schedule
 \section{Training Pipeline Implementation}
 \label{sec:training_pipeline}
 
-Training ran for 500 episodes. Each episode followed this sequence: reset simulation, observe initial state, select action using $\epsilon$-greedy policy, apply yellow phase when switching, execute green phase, collect reward, observe next state, store experience in replay buffer, train on random batch if available, update state.
+Training ran for 300 episodes. Each episode followed this sequence: reset simulation, observe initial state, select action using $\epsilon$-greedy policy, apply 3-second yellow phase when switching to next phase, execute 15-second green phase, collect reward averaged over the action duration, observe next state, store transition experience in replay buffer, train on random mini-batch of 64 if buffer contained sufficient samples, and update state for the next decision step.
 
-Between episodes, $\epsilon$ decayed by multiplying by 0.995. Every 10 episodes, the target network updated its weights, and model checkpoints were saved. Outputs included periodic checkpoints, a final trained model, and training visualizations.
+Between episodes, $\epsilon$ decayed by multiplying by 0.985, gradually reducing random exploration in favour of learned policy exploitation. Every 10 episodes the target network updated its weights by copying directly from the Q-network, stabilising the learning targets. Model checkpoints were saved every 5 episodes to allow recovery and evaluation at intermediate training stages. Outputs included periodic checkpoints, a final trained model saved upon completion of all 300 episodes, and training visualisations showing reward, loss, average waiting time, throughput, and epsilon decay across episodes.
 
 % Centralized configuration file managing hyperparameters, file paths, and phase definitions
 \section{Configuration Management}
 \label{sec:config_management}
 
-A central configuration file managed all parameters: training settings (episodes, learning rate, batch size), \gls{dqn} hyperparameters ($\epsilon$ decay, discount factor, replay buffer size), traffic light identifiers and phase definitions, \gls{sumo} file paths, and action durations (yellow: 3s, green: 15s).
+A central configuration file managed all parameters: training settings (episodes = 300, learning rate = 0.001, batch size = 64), DQN hyperparameters ($\epsilon$ decay = 0.985, discount factor $\gamma$ = 0.95, replay buffer size = 10,000, target network update frequency = 10 episodes), traffic light identifiers and phase definitions for P1, P2 and P3, lane definitions for origin, stopline and outgoing lanes, PCU values for each vehicle type present at Thapathali T1, reward weighting factor $\lambda$ = 0.0004, SUMO simulation file paths, and action durations (yellow transition: 3 seconds, green phase: 15 seconds per decision step). Centralising all parameters in a single configuration file ensured consistency across training, evaluation and comparison scripts and allowed hyperparameter adjustments without modifying the core environment or agent code.
+
+
+\section{Metric Calculation}
+\label{sec:metric_calculation}
+
+Three primary metrics were tracked throughout training and evaluation to assess intersection performance.
+
+Average Waiting Time was calculated by collecting the waiting time of all vehicles present on the incoming route lanes at regular intervals throughout each episode. At each metric collection step, the mean waiting time across all observed vehicles was accumulated and divided by the total number of collection steps to produce the episode-level average waiting time in seconds.
+
+Average Queue Length was calculated by recording the number of halting vehicles across all incoming route lanes at each metric collection step. A vehicle was considered halting if it was either fully stopped below the SUMO default threshold of 0.1 m/s or slow-crawling below 1.5 m/s. The mean halting count across all monitored lanes was accumulated and divided by the total number of collection steps to produce the episode-level average queue length in vehicles.
+
+Throughput per Wait Second was calculated as a composite efficiency metric by dividing the total episode throughput by the average waiting time, quantifying how many vehicles were processed per second of average delay experienced at the intersection:
+
+$$\text{Throughput per Wait Second} = \frac{\text{Total Throughput (vehicles)}}{\text{Average Waiting Time (seconds)}}$$
+
+A higher value indicates a more efficient intersection operation, with more vehicles cleared per unit of delay experienced, allowing direct comparison between the DQN agent and the fixed timer baseline across different traffic conditions.
