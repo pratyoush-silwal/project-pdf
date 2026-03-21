@@ -112,22 +112,26 @@ To interact with the simulation in real-time, the \gls{traci} interface is used.
 \label{sec:dqn_development}
 
 \subsection{State Representation}
-\noindent The \gls{dqn} agent observed key traffic conditions, including vehicle PCU counts on each lane, queue lengths, current traffic signal phases, and vehicle waiting times. These parameters were combined into a 22-dimensional state vector:
+The \gls{dqn} agent observed key traffic conditions at each 15-second decision step, including PCU-weighted vehicle loads on incoming and outgoing lanes, maximum waiting times at stopline lanes, and the current active signal phase. These parameters were combined into a fixed-length 21-dimensional state vector representing the intersection status at each decision step.
+
+
 \[
 s_t = \bigl[ 
-\underbrace{n_1, n_2, \dots, n_{in}}_{\text{Incoming PCU Counts}}, \;
-\underbrace{n_{out,1}, \dots, n_{out,m}}_{\text{Outgoing PCU Counts}}, \;
-\underbrace{0, 1, 0, 0}_{\text{Current Phase}}
+  \underbrace{p_1, p_2, \dots, p_7}_{\text{Incoming PCU (7)}}, \;
+  \underbrace{w_1, w_2, \dots, w_6}_{\text{Stopline Max Wait (6)}}, \;
+  \underbrace{p_{o1}, p_{o2}, \dots, p_{o5}}_{\text{Outgoing PCU (5)}}, \;
+  \underbrace{0, 1, 0}_{\text{Current Phase (3)}}
 \bigr]
 \]
 
+
 \subsection{Action Space}
-\noindent The agent selects from four predefined traffic signal phases. Each phase remains green for 15 seconds, followed by a 3-second yellow transition:
+
+The traffic signal at Thapathali T1 operates across three predefined phases (P1, P2, P3) in a cyclic sequence. At every 15-second decision interval the DQN agent selects one of two actions - Action 1 (STAY) or Action 2 (NEXT) - to control the signal timing. A phase can be held for a maximum of 60 seconds (4 consecutive STAY actions) before automatically advancing to the next phase, ensuring no traffic direction is starved indefinitely.
 \begin{itemize}
-    \item \textbf{Action 1:} Straight movements between Maitighar and Kupondole.
-    \item \textbf{Action 2:} Right turn from Maitighar to Tripureshwor + Maitighar to Kupondole.
-    \item \textbf{Action 3:} Straight from Tripureshwor to Maternity + Maternity left movements.
-    \item \textbf{Action 4:} Right from Kupondole to Maternity + Maitighar straight movements.
+  \item \textbf{Action 1 (STAY)}: 
+The agent maintains the current active phase for another 15 seconds, allowing continued service to the same direction.
+  \item \textbf{Action 2 (NEXT)}: The agent advances to the next phase in the cycle, switching service to the next direction. Each phase transition includes a 3-second yellow interval to ensure realistic and safe signal timing.
 \end{itemize}
 
 \subsection{Reward Function}
