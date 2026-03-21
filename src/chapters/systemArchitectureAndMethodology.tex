@@ -136,13 +136,27 @@ The agent maintains the current active phase for another 15 seconds, allowing co
 
 \subsection{Reward Function}
 \noindent A reward function based on Max-Pressure Theory was used. Pressure was calculated as the difference between incoming and outgoing vehicle PCU counts:
+
 \begin{equation}
-R = -\sum_{i \in L_{\text{in}}} \left( w(i) - \frac{1}{|L_{\text{out}}|} \sum_{j \in L_{\text{out}}} w(j) \right) - \lambda \times (\text{max waiting time})
+R = -\left(\sum_{l \in L_{\text{stop}}} \text{PCU}(l) - \sum_{l \in L_{\text{out}}} \text{PCU}(l)\right) - \lambda \sum_{l \in L_{\text{stop}}} \sum_{v \in l} \text{PCU}(v) \cdot w^{acc}(v)
 \end{equation}
 
-\subsection{Neural Network Architecture}
-\noindent The agent uses a deep neural network with an input layer, two hidden layers (128 and 64 neurons), and an output layer for action values.
+\textbf{Where:}
+\begin{itemize}
+    \item $L_{\text{stop}}$ — set of 6 stopline lanes
+    \item $L_{\text{out}}$ — set of 5 outgoing lanes
+    \item $\mathrm{PCU}(l)$ — total PCU-weighted vehicle load on lane $l$ at current step
+    \item $\mathrm{PCU}(v)$ — PCU value of individual vehicle $v$
+    \item $w^{\text{acc}}(v)$ — accumulated waiting time (seconds) of vehicle $v$ since simulation start
+    \item $\lambda = 0.0004$ — weighting factor balancing throughput and wait time penalty
+\end{itemize}
 
+
+\subsection{Neural Network Architecture}
+
+The agent was implemented using a deep neural network with one input layer, three hidden layers of 128, 64, and 32 neurons respectively, and an output layer with two action values corresponding to STAY and NEXT. The input layer accepts the 21-dimensional state vector representing current intersection conditions. ReLU activation functions were applied after each hidden layer to introduce non-linearity. The output layer produces Q-values for each of the two possible actions, from which the agent selects the action with the highest estimated future reward.
+
+Two identical networks were used: a Q-network for action selection and a target network to stabilise learning during training. The target network weights were updated every 10 episodes by copying the Q-network weights, preventing oscillations and divergence during the training process.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{src/images/figures/NN.png}
@@ -155,8 +169,8 @@ R = -\sum_{i \in L_{\text{in}}} \left( w(i) - \frac{1}{|L_{\text{out}}|} \sum_{j
 \label{sec:training_process}
 
 \subsection{Learning Strategy}
-\noindent An $\epsilon$-greedy strategy was used. The agent initially explored the environment ($\epsilon = 1.0$) and gradually reduced $\epsilon$ to 0.01 to favor exploitation of learned strategies.
 
+An $\epsilon$-greedy learning strategy was used to balance exploration and exploitation during training. The agent initially explored the environment by selecting random actions with $\epsilon$ set to 1.0, ensuring broad coverage of the state space in early episodes. After each episode, $\epsilon$ was multiplicatively decayed by a factor of 0.985, gradually reducing random exploration and allowing the agent to increasingly rely on its learned Q-values for action selection. By approximately episode 300, $\epsilon$ reached its minimum value of 0.01, at which point the agent exploits its learned policy for 99\% of decisions while retaining a small probability of random exploration to avoid getting trapped in suboptimal policies.
 \subsection{Experience Replay}
 \noindent Experience replay improved stability by storing transitions in a 10,000-capacity buffer. Random samples were used for training to break temporal correlations.
 
