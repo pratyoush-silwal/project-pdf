@@ -7,22 +7,27 @@
 The following snippet defines the architecture of the \gls{dqn} model used for traffic signal control.
 
 \begin{lstlisting}[language=Python, caption={DQN Model Architecture}]
-import torch
-import torch.nn as nn
-
 class DQNetwork(nn.Module):
+    """
+    Deep Q-Network.
+    Input : 21-dim state [7 origin PCU | 6 stopline wait | 5 outgoing PCU | 3 one-hot]
+    Output: Q-value for STAY (0) and NEXT (1)
+    Architecture: 128 -> 64 -> 32 hidden layers, ReLU activations
+    """
 
     def __init__(self, state_size, action_size):
         super(DQNetwork, self).__init__()
-        self.fc1 = nn.Linear(state_size, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, action_size)
-        
+        layers  = []
+        in_size = state_size
+        for out_size in config.HIDDEN_LAYERS:
+            layers.append(nn.Linear(in_size, out_size))
+            layers.append(nn.ReLU())
+            in_size = out_size
+        layers.append(nn.Linear(in_size, action_size))
+        self.net = nn.Sequential(*layers)
+
     def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+        return self.net(x)
 \end{lstlisting}
 
 % Circular buffer for storing and sampling experience tuples during training
@@ -31,34 +36,32 @@ class DQNetwork(nn.Module):
 This snippet demonstrates how experiences (state, action, reward, next state, done) are stored and sampled in the replay buffer.
 
 \begin{lstlisting}[language=Python, caption={Replay Buffer Implementation}]
-from collections import deque
-import random
-import numpy as np
-
 class ReplayBuffer:
+    """
+    Circular experience replay memory -- capacity 10,000.
+    Stores (state, action, reward, next_state, done).
+    Random sampling breaks time correlation so agent learns
+    from mix of all traffic patterns simultaneously.
+    """
 
-    def __init__(self, buffer_size):
-        self.buffer = deque(maxlen=buffer_size)
-    
+    def __init__(self, capacity):
+        self.buffer = deque(maxlen=capacity)
+
     def add(self, state, action, reward, next_state, done):
         self.buffer.append((state, action, reward, next_state, done))
 
-    
     def sample(self, batch_size):
         batch = random.sample(self.buffer, batch_size)
-        states, actions, rewards, next_states, dones = zip(*batch)
+        s, a, r, ns, d = zip(*batch)
         return (
-            np.array(states),
-            np.array(actions),
-            np.array(rewards),
-            np.array(next_states),
-            np.array(dones)
+            np.array(s,  dtype=np.float32),
+            np.array(a,  dtype=np.int64),
+            np.array(r,  dtype=np.float32),
+            np.array(ns, dtype=np.float32),
+            np.array(d,  dtype=np.float32),
         )
 
-
-        
-    
-    def size(self):
+    def __len__(self):
         return len(self.buffer)
 \end{lstlisting}
 
@@ -68,38 +71,49 @@ class ReplayBuffer:
 This snippet defines the \gls{dqn} agent that interacts with the traffic control environment, selecting actions and updating the model.
 
 \begin{lstlisting}[language=Python, caption={DQN Agent Implementation}]
-import torch.optim as optim
-
 class DQNAgent:
 
-    def __init__(self, state_size, action_size):
-        self.state_size = state_size
+    def __init__(self, state_size=config.STATE_SIZE,
+                 action_size=config.NUM_ACTIONS):
+        self.state_size  = state_size
         self.action_size = action_size
-        self.gamma = 0.99
-        self.epsilon = 1.0
-        self.epsilon_min = 0.1
-        self.epsilon_decay = 0.995
-        self.learning_rate = 0.001
-        self.batch_size = 32
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.q_network = DQNetwork(state_size, action_size).to(self.device)
-        self.target_network = DQNetwork(state_size, action_size).to(self.device)
-        self.update_target_network()
-        self.optimizer = optim.Adam(self.q_network.parameters(), lr=self.learning_rate)
-        self.replay_buffer = ReplayBuffer(10000)
-        self.criterion = nn.MSELoss()
-    
-    def update_target_network(self):
-        self.target_network.load_state_dict(self.q_network.state_dict())
-    
+
+        self.gamma         = config.GAMMA
+        self.epsilon       = config.EPSILON_START
+        self.epsilon_min   = config.EPSILON_MIN
+        self.epsilon_decay = config.EPSILON_DECAY
+        self.batch_size    = config.BATCH_SIZE
+
+        # Device selection: MPS (Apple Metal GPU) > CUDA > CPU
+        if torch.backends.mps.is_available():
+            self.device = torch.device("mps")
+        elif torch.cuda.is_available():
+            self.device = torch.device("cuda")
+        else:
+            self.device = torch.device("cpu")
+        print(f"  [DQN] Using device: {self.device}")
+
+        self.q_net      = DQNetwork(state_size, action_size).to(self.device)
+        self.target_net = DQNetwork(state_size, action_size).to(self.device)
+        self.sync_target()
+
+        self.optimizer = optim.Adam(
+            self.q_net.parameters(), lr=config.LEARNING_RATE)
+        self.loss_fn   = nn.MSELoss()
+
+        self.memory      = ReplayBuffer(config.REPLAY_BUFFER_SIZE)
+        self.total_steps = 0
+
+    def sync_target(self):
+        self.target_net.load_state_dict(self.q_net.state_dict())
+
     def act(self, state, training=True):
+        
         if training and random.random() < self.epsilon:
             return random.randrange(self.action_size)
-        
         with torch.no_grad():
-            state_tensor = torch.FloatTensor(state).unsqueeze(0).to(self.device)
-            q_values = self.q_network(state_tensor)
-            return q_values.argmax().item()
+            t = torch.FloatTensor(state).unsqueeze(0).to(self.device)
+            return self.q_net(t).argmax().item()
 \end{lstlisting}
 
 % Training loop performing experience replay, loss computation, and weight updates
@@ -108,29 +122,38 @@ class DQNAgent:
 This snippet demonstrates the process of training the \gls{dqn} agent, including experience replay and the loss calculation.
 
 \begin{lstlisting}[language=Python, caption={Training the DQN Agent}]
-    def replay(self):
-        if self.replay_buffer.size() < self.batch_size:
-            return 0.0 
+def train_step(self):
+        """
+        Train on one random batch.
+        Bellman target: reward + gamma * max(target_net(next_state))
+        Returns loss value, 0.0 if buffer not full yet.
+        """
+        if len(self.memory) < self.batch_size:
+            return 0.0
 
-        states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.batch_size)
-        states = torch.FloatTensor(states).to(self.device)
-        actions = torch.LongTensor(actions).to(self.device)
-        rewards = torch.FloatTensor(rewards).to(self.device)
+        states, actions, rewards, next_states, dones = \
+            self.memory.sample(self.batch_size)
+
+        states      = torch.FloatTensor(states).to(self.device)
+        actions     = torch.LongTensor(actions).to(self.device)
+        rewards     = torch.FloatTensor(rewards).to(self.device)
         next_states = torch.FloatTensor(next_states).to(self.device)
-        dones = torch.FloatTensor(dones).to(self.device)
+        dones       = torch.FloatTensor(dones).to(self.device)
 
-        current_q_values = self.q_network(states).gather(1, actions.unsqueeze(1)).squeeze(1)
-        
+        current_q = self.q_net(states).gather(
+            1, actions.unsqueeze(1)).squeeze(1)
+
         with torch.no_grad():
-            next_q_values = self.target_network(next_states).max(1)[0]
-            target_q_values = rewards + (1 - dones) * self.gamma * next_q_values
-        
-        loss = self.criterion(current_q_values, target_q_values)
+            next_q   = self.target_net(next_states).max(1)[0]
+            target_q = rewards + (1 - dones) * self.gamma * next_q
 
+        loss = self.loss_fn(current_q, target_q)
         self.optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.q_net.parameters(), 1.0)
         self.optimizer.step()
-        
+
+        self.total_steps += 1
         return loss.item()
 \end{lstlisting}
 
@@ -140,22 +163,24 @@ This snippet demonstrates the process of training the \gls{dqn} agent, including
 The following snippet shows how to save and load the model state.
 
 \begin{lstlisting}[language=Python, caption={Model Saving and Loading}]
-    def save(self, filepath):
+def save(self, path):
         torch.save({
-            'q_network_state_dict': self.q_network.state_dict(),
-            'target_network_state_dict': self.target_network.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict(),
-            'epsilon': self.epsilon
-        }, filepath)
-        print(f"Model saved to {filepath}")
-    
-    def load(self, filepath):
-        checkpoint = torch.load(filepath)
-        self.q_network.load_state_dict(checkpoint['q_network_state_dict'])
-        self.target_network.load_state_dict(checkpoint['target_network_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        self.epsilon = checkpoint['epsilon']
-        print(f"Model loaded from {filepath}")
+            'q_net':       self.q_net.state_dict(),
+            'target_net':  self.target_net.state_dict(),
+            'optimizer':   self.optimizer.state_dict(),
+            'epsilon':     self.epsilon,
+            'total_steps': self.total_steps,
+        }, path)
+        print(f"  [DQN] Saved -> {path}")
+
+    def load(self, path):
+        ckpt = torch.load(path, map_location=self.device)
+        self.q_net.load_state_dict(ckpt['q_net'])
+        self.target_net.load_state_dict(ckpt['target_net'])
+        self.optimizer.load_state_dict(ckpt['optimizer'])
+        self.epsilon     = ckpt['epsilon']
+        self.total_steps = ckpt.get('total_steps', 0)
+        print(f"  [DQN] Loaded <- {path}  (epsilon={self.epsilon:.4f})")
 \end{lstlisting}
 
 % Brief recap of the code appendix and its purpose

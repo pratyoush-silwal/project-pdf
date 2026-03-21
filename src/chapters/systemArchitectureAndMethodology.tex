@@ -112,11 +112,11 @@ To interact with the simulation in real-time, the \gls{traci} interface is used.
 \label{sec:dqn_development}
 
 \subsection{State Representation}
-\noindent The \gls{dqn} agent observed key traffic conditions, including vehicle counts on each lane, queue lengths, current traffic signal phases, and vehicle waiting times. These parameters were combined into a 22-dimensional state vector:
+\noindent The \gls{dqn} agent observed key traffic conditions, including vehicle PCU counts on each lane, queue lengths, current traffic signal phases, and vehicle waiting times. These parameters were combined into a 22-dimensional state vector:
 \[
 s_t = \bigl[ 
-\underbrace{n_1, n_2, \dots, n_{in}}_{\text{Incoming Counts}}, \;
-\underbrace{n_{out,1}, \dots, n_{out,m}}_{\text{Outgoing Counts}}, \;
+\underbrace{n_1, n_2, \dots, n_{in}}_{\text{Incoming PCU Counts}}, \;
+\underbrace{n_{out,1}, \dots, n_{out,m}}_{\text{Outgoing PCU Counts}}, \;
 \underbrace{0, 1, 0, 0}_{\text{Current Phase}}
 \bigr]
 \]
@@ -131,7 +131,7 @@ s_t = \bigl[
 \end{itemize}
 
 \subsection{Reward Function}
-\noindent A reward function based on Max-Pressure Theory was used. Pressure was calculated as the difference between incoming and outgoing vehicle densities:
+\noindent A reward function based on Max-Pressure Theory was used. Pressure was calculated as the difference between incoming and outgoing vehicle PCU counts:
 \begin{equation}
 R = -\sum_{i \in L_{\text{in}}} \left( w(i) - \frac{1}{|L_{\text{out}}|} \sum_{j \in L_{\text{out}}} w(j) \right) - \lambda \times (\text{max waiting time})
 \end{equation}

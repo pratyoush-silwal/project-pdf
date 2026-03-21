@@ -29,29 +29,28 @@ A \gls{dqn}-based traffic signal controller is expected to reduce average waitin
 \section{Objectives}
 \label{sec:objectives}
 
+The primary objectives of this project are:
+
 \begin{itemize}
     \item To develop a \gls{dqn}-based \gls{drl} agent for adaptive traffic signal control using \gls{sumo} in a realistic simulation of the Thapathali Intersection.
     \item To compare the performance of the proposed agent against conventional traffic signal control methods.
 \end{itemize}
 
 % Boundaries of the project and known constraints on the implementation
-\section{Scope and Limitations}
+\section{Scope and Applications}
 \label{sec:scope_limitations}
 
 This project focuses on developing a \gls{dqn}-based \gls{drl} agent for adaptive traffic signal control using realistic simulation of the Thapathali intersection. The scope defines what will be covered in the project and sets clear boundaries for its implementation. The intended applications include simulation-based testing of signal timing strategies for a Thapathali intersection, comparative performance analysis against baseline signal plans, and decision support for traffic engineering studies prior to real-world deployment. The proposed system is designed to be scalable; subject to time and data availability, it can be extended to multi-intersection coordination in future work.
 
 \subsection{Scope}
 \label{subsec:scope}
+
+The scope of the Project encompasses the objectives, boundaries, and key focus areas of the work.
+
 \begin{itemize}
     \item To configure the Thapathali intersection map into \gls{sumo} to simulate realistic traffic patterns.
     \item To design the \gls{dqn}-based \gls{drl} agent with state representations, reward functions, and action spaces.
     \item To evaluate model performance using metrics such as average waiting time, queue lengths, and vehicle throughput.
 \end{itemize}
 
-\subsection{Limitations}
-\label{subsec:limitations}
-\begin{itemize}
-    \item No hardware implementation or real-world field testing with traffic signals.
-    \item Pedestrians and public transport are excluded in this phase to keep the control problem tractable and focus on vehicle-delay reduction at Thapathali; modeling them requires additional constraints and reliable data.
-    \item Extreme scenarios or multi-modal integration, like ride-sharing or parking systems, are not considered.
-\end{itemize}
+

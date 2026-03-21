@@ -137,19 +137,762 @@ x))) (/usr/share/texmf-dist/tex/latex/tools/shellesc.sty))
 (/usr/share/texmf-dist/tex/latex/kvoptions/kvoptions.sty
 (/usr/share/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty))
 (/usr/share/texmf-dist/tex/latex/filehook/filehook.sty
-(/usr/share/texmf-dist/tex/latex/filehook/filehook-2020.sty))) (./project.sta)
-! Extra }, or forgotten \endgroup.
-l.555   }
-         %
+(/usr/share/texmf-dist/tex/latex/filehook/filehook-2020.sty)))
+(/usr/share/texmf-dist/tex/latex/gincltex/gincltex.sty
+(/usr/share/texmf-dist/tex/latex/svn-prov/svn-prov.sty))
+(/usr/share/texmf-dist/tex/latex/filemod/filemod-expmin.sty))
+(/usr/share/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(/usr/share/texmf-dist/tex/latex/koma-script/scrlayer-scrpage.sty
+(/usr/share/texmf-dist/tex/latex/koma-script/scrlayer.sty))
+(/usr/share/texmf-dist/tex/latex/algorithms/algorithm.sty)
+(/usr/share/texmf-dist/tex/latex/algorithmicx/algpseudocode.sty
+(/usr/share/texmf-dist/tex/latex/algorithmicx/algorithmicx.sty
+Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
+)
+Document Style - pseudocode environments for use with the `algorithmicx' style
+) (/usr/share/texmf-dist/tex/latex/scrhack/scrhack.sty
+(/usr/share/texmf-dist/tex/latex/floatbytocbasic/floatbytocbasic.sty)
+(/usr/share/texmf-dist/tex/latex/lscapeenhanced/lscapeenhanced.sty))
+(/usr/share/texmf-dist/tex/latex/setspace/setspace.sty)
+(/usr/share/texmf-dist/tex/latex/setspaceenhanced/setspaceenhanced.sty)
+(/usr/share/texmf-dist/tex/latex/glossaries/base/glossaries.sty
+(/usr/share/texmf-dist/tex/latex/mfirstuc/mfirstuc.sty)
+(/usr/share/texmf-dist/tex/latex/xfor/xfor.sty)
+(/usr/share/texmf-dist/tex/latex/datatool/datatool-base.sty
+(/usr/share/texmf-dist/tex/latex/datatool/datatool-l3fp.def)
+(/usr/share/texmf-dist/tex/latex/datatool/datatool-utf8.ldf)
+(/usr/share/texmf-dist/tex/latex/datatool-english/datatool-english.ldf
+(/usr/share/texmf-dist/tex/latex/datatool-english/datatool-english-utf8.ldf)))
+(/usr/share/texmf-dist/tex/latex/glossaries/styles/glossary-hypernav.sty)
+(/usr/share/texmf-dist/tex/latex/glossaries/styles/glossary-list.sty)
+(/usr/share/texmf-dist/tex/latex/glossaries/styles/glossary-long.sty
+(/usr/share/texmf-dist/tex/latex/tools/longtable.sty))
+(/usr/share/texmf-dist/tex/latex/glossaries/styles/glossary-super.sty
+(/usr/share/texmf-dist/tex/latex/supertabular/supertabular.sty))
+(/usr/share/texmf-dist/tex/latex/glossaries/styles/glossary-tree.sty))
+(/usr/share/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texmf-dist/tex/generic/pdfescape/pdfescape.sty)
+(/usr/share/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty))
+(/usr/share/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(/usr/share/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/share/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/usr/share/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/share/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/usr/share/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texmf-dist/tex/latex/cleveref/cleveref.sty)
+(/usr/share/texmf-dist/tex/latex/listings/lstlang1.sty)) (./vars.tex)
+(/usr/share/texmf-dist/tex/latex/tcolorbox/tcolorbox.sty
+(/usr/share/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(/usr/share/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(/usr/share/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+(/usr/share/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg)
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdftex.def
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def)))
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code
+.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.te
+x) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics
+.code.tex) (/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.code.tex
+) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code.tex)
+
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.code.t
+ex) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.code.te
+x) (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex)
+ (/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex)))
+(/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex)
+(/usr/share/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.sty)
+(/usr/share/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.sty))
+(/usr/share/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(/usr/share/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(/usr/share/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers.code.te
+x) (/usr/share/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+topaths.code.tex))) (/usr/share/texmf-dist/tex/latex/tools/verbatim.sty)
+(/usr/share/texmf-dist/tex/latex/environ/environ.sty
+(/usr/share/texmf-dist/tex/latex/trimspaces/trimspaces.sty)))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+positioning.code.tex)
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shapes.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shapes.geometric.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshapes.geomet
+ric.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shapes.misc.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshapes.misc.c
+ode.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shapes.symbols.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshapes.symbol
+s.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shapes.arrows.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshapes.arrows
+.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shapes.callouts.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshapes.callou
+ts.code.tex))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+shapes.multipart.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/shapes/pgflibraryshapes.multip
+art.code.tex)))
+(/usr/share/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrary
+arrows.code.tex
+(/usr/share/texmf-dist/tex/generic/pgf/libraries/pgflibraryarrows.code.tex))
+(./src/frontmatter/abbreviations.tex) (./src/frontmatter/symbols.tex)
+(/usr/share/texmf-dist/tex/latex/psnfss/t1ptm.fd) (./project.aux)
+(/usr/share/texmf-dist/tex/latex/newtx/omlntxmi.fd)
+(/usr/share/texmf-dist/tex/latex/newtx/untxexa.fd)
+(/usr/share/texmf-dist/tex/latex/newtx/lmsntxsy.fd)
+(/usr/share/texmf-dist/tex/latex/newtx/lmxntxexx.fd)
+(/usr/share/texmf-dist/tex/latex/microtype/mt-ptm.cfg)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+(/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+(/usr/share/texmf-dist/tex/latex/caption/ltcaption.sty)
+(/usr/share/texmf-dist/tex/latex/translations/translations-basic-dictionary-eng
+lish.trsl) (/usr/share/texmf-dist/tex/latex/pdflscape/pdflscape.sty
+(/usr/share/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty))
+(/usr/share/texmf-dist/tex/latex/bookmark/bookmark.sty
+(/usr/share/texmf-dist/tex/latex/bookmark/bkm-pdftex.def))
+(./src/frontmatter/_coverBase.tex
+(/usr/share/texmf-dist/tex/latex/newtx/ot1minntx.fd)
+(/usr/share/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texmf-dist/tex/latex/microtype/mt-msa.cfg)
+(/usr/share/texmf-dist/tex/latex/amsfonts/umsb.fd)
+(/usr/share/texmf-dist/tex/latex/microtype/mt-msb.cfg)
+(/usr/share/texmf-dist/tex/latex/newtx/untxmia.fd)
+(/usr/share/texmf-dist/tex/latex/newtx/untxsym.fd)
+(/usr/share/texmf-dist/tex/latex/newtx/untxsyc.fd)
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf-dist/fon
+ts/enc/dvips/base/8r.enc} <./src/images/logo.png>])
+(./src/frontmatter/_coverWithSupervisors.tex
+[2]) (./src/frontmatter/acknow.tex
+(/usr/share/texmf-dist/tex/latex/psnfss/t1phv.fd))
+(./src/frontmatter/abstract.tex
+[1]) (./src/frontmatter/toc.tex
+[2]
+No file project.toc.
+
+[3]
+No file project.lof.
+
+[4]
+No file project.lot.
+
+[5] (./project.loa)
+
+Package glossaries Warning: Empty glossary for \printnoidxglossary[type={acrony
+m}]. Rerun may be required (or you may have forgotten to use commands like \gls
+) on input line 18.
+
+
+Package glossaries Warning: Empty glossary for \printnoidxglossary[type={symbol
+s}]. Rerun may be required (or you may have forgotten to use commands like \gls
+) on input line 22.
+
+)
+[6] (./src/chapters/intro.tex
+chapter 1.
+
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.25 
+      [1] (/usr/share/texmf-dist/tex/latex/psnfss/ts1ptm.fd)
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.48     \item T
+                o evaluate model performance using metrics such as average w...
+[2]) (./src/chapters/literatureReview.tex
+[3]
+chapter 2.
+
+LaTeX Warning: Citation `maharjan2023performance' on page 4 undefined on input 
+line 5.
+
+
+LaTeX Warning: Citation `wei2020survey' on page 4 undefined on input line 10.
+
+
+LaTeX Warning: Citation `wei2020survey' on page 4 undefined on input line 10.
+
+
+LaTeX Warning: Citation `wei2020survey' on page 4 undefined on input line 10.
+
+
+LaTeX Warning: Citation `wei2020survey' on page 4 undefined on input line 12.
+
+
+LaTeX Warning: Citation `wei2020survey' on page 4 undefined on input line 17.
+
+
+LaTeX Warning: Citation `wei2019colight' on page 4 undefined on input line 17.
+
+
+LaTeX Warning: Citation `wei2020survey' on page 4 undefined on input line 17.
+
+
+[4]
+
+LaTeX Warning: Citation `wei2019presslight' on page 5 undefined on input line 2
+2.
+
+
+LaTeX Warning: Citation `wei2019presslight' on page 5 undefined on input line 2
+2.
+
+
+LaTeX Warning: Citation `wei2019presslight' on page 5 undefined on input line 2
+4.
+
+
+LaTeX Warning: Citation `wei2020survey' on page 5 undefined on input line 24.
+
+
+LaTeX Warning: Citation `wei2019colight' on page 5 undefined on input line 29.
+
+
+LaTeX Warning: Citation `wei2019colight' on page 5 undefined on input line 29.
+
+
+LaTeX Warning: Citation `wei2019colight' on page 5 undefined on input line 29.
+
+
+[5]
+
+LaTeX Warning: Citation `zheng2019learning' on page 6 undefined on input line 3
+4.
+
+
+LaTeX Warning: Citation `zheng2019learning' on page 6 undefined on input line 3
+4.
+
+
+LaTeX Warning: Citation `zheng2019learning' on page 6 undefined on input line 3
+9.
+
+
+LaTeX Warning: Citation `maharjan2023performance' on page 6 undefined on input 
+line 39.
+
+
+LaTeX Warning: Citation `maharjan2023performance' on page 6 undefined on input 
+line 39.
+
+
+LaTeX Warning: Citation `wei2019presslight' on page 6 undefined on input line 4
+4.
+
+
+LaTeX Warning: Citation `wei2019colight' on page 6 undefined on input line 44.
+
+
+LaTeX Warning: Citation `zheng2019learning' on page 6 undefined on input line 4
+4.
+
+
+LaTeX Warning: Citation `wei2020survey' on page 6 undefined on input line 44.
+
+
+LaTeX Warning: Citation `maharjan2023performance' on page 6 undefined on input 
+line 44.
+
+
+[6]
+Overfull \hbox (57.95844pt too wide) in paragraph at lines 51--62
+ [][] 
+) (./src/chapters/requirements.tex
+[7]
+chapter 3.
+
+[8]) (./src/chapters/systemArchitectureAndMethodology.tex
+[9]
+chapter 4.
+
+LaTeX Warning: Citation `maharjan2023performance' on page 10 undefined on input
+ line 23.
+
+
+[10 <./src/images/figures/system_diagram.jpeg>]
+Overfull \hbox (2.56142pt too wide) in paragraph at lines 34--50
+ [][] 
+(/usr/share/texmf-dist/tex/latex/psnfss/t1pcr.fd)
+[11]
+[12]
+[13]
+[14{/usr/share/texmf-dist/fonts/enc/dvips/newtx/ntx-ot1-tlf.enc} <./src/images/
+figures/sumoenviroment.jpeg>]
+[15 <./src/images/figures/NN.png>]) (./src/chapters/implementationDetails.tex
+[16]
+[17
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.1}) 
+has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.2}) 
+has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.3}) 
+has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.4}) 
+has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.5}) 
+has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.6}) 
+has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.7}) 
+has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.8}) 
+has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.9}) 
+has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.10})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.11})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.12})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.13})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.1 \chapter
+            {Implementation Details}]
+chapter 5.
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.1}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.17 \State
+            \textbf{Input:}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.2}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.18 \State
+            $\quad vehicle\_counts$: Dictionary $\{vc_1: count_1, vc_2: coun...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.3}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.19 \State
+            $\quad proportions$: Dictionary $\{od_1: p_1, od_2: p_2, \dots\}$
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.4}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.20 \State
+            $\quad od\_names$: List of OD names $[od_1, od_2, \dots, od_N]$
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.5}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.21 \State
+            $\quad prev\_remainders$: Dictionary $\{od_1: r_1, od_2: r_2, \d...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.6}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.23 \State
+            \textbf{Output:}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.7}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.24 \State
+            $\quad allocation$: Dictionary $\{od_1: \{vc_1: count, \dots\}, ...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.8}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.25 \State
+            $\quad new\_remainders$: Dictionary $\{od_1: r_1, od_2: r_2, \do...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.9}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.27 \Procedure
+               {AllocateIntervalPerfect}{$vehicle\_counts$, $proportions$, $...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.10})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.28     \If
+            {$prev\_remainders$ is None}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.11})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.29         \State
+                    Initialize $prev\_remainders \gets \{od: 0 \text{ for al...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.12})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.30     \EndIf
+               
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.13})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.32     \State
+                Initialize $allocation \gets \{od: \{\} \text{ for all } od ...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.14})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.33     \State
+                Initialize $new\_remainders \gets \{od: 0 \text{ for all } o...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.15})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.35     \ForAll
+                {$(vehicle\_class, total\_count) \in vehicle\_counts$}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.16})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.36         \If
+                {$total\_count = 0$}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.17})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.37             \State
+                        \textbf{continue}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.1}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.59 \Procedure
+               {AllocateVehiclesPerfect}{$vehicle\_counts$, $proportions$, $...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.2}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.60     \State
+                Initialize $result \gets \{od: \{vc: 0 \text{ for all } vc\}...
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.3}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.62     \ForAll
+                {$(vehicle\_class, total\_count) \in vehicle\_counts$}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.4}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.63         \If
+                {$total\_count = 0$}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.5}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.64             \State
+                        \textbf{continue}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.6}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.65         \EndIf
+                   
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.7}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.67         \State
+                    $targets \gets \{\}$ \Comment{Exact target allocations}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.8}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.68         \ForAll
+                    {$od \in od\_names$}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.9}) 
+has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.69             \State
+                        $targets[od] \gets total\_count \times proportions[od]$
+
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.10})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.70         \EndFor
+                    
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.11})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.72         \State
+                    \Comment{Step 1: Allocate integer parts}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.12})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.73         \State
+                    $allocated \gets \{\}$
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.13})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.74         \State
+                    $fractions \gets \{\}$
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.14})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.75         \ForAll
+                    {$od \in od\_names$}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.15})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.76             \State
+                        $allocated[od] \gets \lfloor targets[od] \rfloor$
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.16})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.77             \State
+                        $fractions[od] \gets targets[od] - allocated[od]$
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.17})
+ has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.78         \EndFor
+                    
+Overfull \hbox (11.70457pt too wide) detected at line 114
+[]
+
+[18]
+[19
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.18})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.19})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.20})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.21})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.22})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.23})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.24})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.25})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.26})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.27})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}
+pdfTeX warning (ext4): destination with the same identifier (name{ALG@line.28})
+ has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.142 \subsection
+                 {SUMO Configuration Files}]
+[20]
+
+LaTeX Warning: Citation `SUMO2025' on page 21 undefined on input line 144.
+
+
+[21]
+Overfull \hbox (10.35893pt too wide) in paragraph at lines 177--208
+ [][] 
+
+[22]
+[23]
+[24 <./src/images/figures/traffic_flow_representation.jpeg>]
+[25]
+[26 <./src/images/figures/implemented_signal_phases.jpeg>]
+[27]) (./src/chapters/resultAndAnalysis.tex
+[28]
+chapter 6.
+
+LaTeX Warning: Reference `fig:sumulation_environment' on page 29 undefined on i
+nput line 8.
+
+
+LaTeX Warning: File `../../src/images/figures/simulation_environment.png' not f
+ound on input line 12.
+
+
+! Package pdftex.def Error: File `../../src/images/figures/simulation_environme
+nt.png' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.12 ...images/figures/simulation_environment.png}
+                                                  
 ? 
 ! Emergency stop.
-l.555 
-      
+ ...                                              
+                                                  
+l.12 ...images/figures/simulation_environment.png}
+                                                  
 !  ==> Fatal error occurred, no output PDF file produced!
 Transcript written on project.log.
 Latexmk: Getting log file 'project.log'
 Latexmk: Examining 'project.fls'
 Latexmk: Examining 'project.log'
+Latexmk: Summary of warnings from last run of *latex:
+  Latex failed to resolve 1 reference(s)
+  Latex failed to resolve 27 citation(s)
 Latexmk: Errors, so I did not complete making targets
 Collected error summary (may duplicate other messages):
   pdflatex: Command for 'pdflatex' gave return code 1

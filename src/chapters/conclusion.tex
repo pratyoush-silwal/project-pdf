@@ -5,14 +5,140 @@
 \section{Achievements}
 \label{sec:achievements}
 
+The following Achievements were achieved in this project:
+
+\begin{itemize}
+\item
+  Data collection and vehicle allocation from relevant sources.
+\item
+  Configuration of SUMO for the Thapathali intersection, including road
+  layout,traffic flow, and signal configuration.
+\item
+  Setup of the simulation environment for testing the traffic control
+  system.
+\item
+  Fixed-timer logic configuration for baseline comparison.
+\item
+  DQN agent design and implementation for traffic signal optimisation.
+\item
+  The average waiting time over the 16-hour period (6 AM to 10 PM) was
+  reduced by 22.90\%.
+\item
+  The average queue length over the 16-hour period was reduced by
+  30.06\%.
+\item
+  The average throughput per waiting second over the 16-hour period
+  improved by 32.65\%.
+\end{itemize}
+
 % Constraints, shortcomings, and areas where further work is warranted
 \section{Limitations}
 \label{sec:limitations}
+
+Some factors were not considered or implemented in the current system;
+these are outlined below as limitations.
+
+\begin{itemize}
+\item
+  No hardware implementation or real-world field testing with traffic
+  signals.
+\item
+  Pedestrians and public transport are excluded in this phase to keep
+  the control problem
+\item
+  tractable and focus on vehicle-delay reduction at Thapathali; modeling
+  them requires
+\item
+  additional constraints and reliable data.
+\item
+  Extreme scenarios or multi-modal integration, like ride-sharing or
+  parking systems,
+\item
+  are not considered.
+\item
+  Random traffic signal timers were placed at the end of outgoing lanes
+  to simulate network backspill; however, these were not based on the
+  actual traffic conditions of the neighbouring network
+\end{itemize}
 
 % Directions for extending this work in scope, methodology, or deployment
 \section{Future Work}
 \label{sec:future_work}
 
+Future development may include:
+
+\begin{itemize}
+\item
+  Multi-Intersection Coordination: Scaling the system to manage multiple
+  connected
+\end{itemize}
+
+\begin{quote}
+intersections.
+\end{quote}
+
+\begin{itemize}
+\item
+  Advanced Optimization: Exploring hybrid algorithms or multi-agent RL
+  for more
+\end{itemize}
+
+complex network topologies.
+
 % Closing statement on the project's overall contribution and significance
 \section{Final Remarks}
 \label{sec:final_remarks}
+
+This project set out to investigate whether a reinforcement
+learning-based approach could meaningfully improve traffic signal
+control at the Thapathali intersection in Kathmandu, one of the
+city\textquotesingle s most persistently congested arterial junctions.
+The results suggest that it can, and the case for adaptive signal
+control is stronger than the numbers alone convey.
+
+The DQN agent demonstrated consistent improvement over fixed-timer logic
+across the full operational window. Where the gains are most evident is
+during low-to-moderate demand periods, hours where fixed timing is
+structurally wasteful, holding vehicles at red signals long after
+opposing flows have cleared. In these windows, the
+agent\textquotesingle s ability to read and react to real-time queue
+states yielded noticeably better outcomes, highlighting just how rigid
+and inefficient schedule-based control becomes when traffic is light and
+variable.
+
+The more telling story, however, lies in the peak hours. Improvements
+during high-demand periods, the morning and evening surges that define
+Kathmandu\textquotesingle s daily congestion profile, were comparatively
+modest. This is not a failure of the algorithm; it is a reflection of a
+harder problem. At genuine saturation, when every approach is
+simultaneously overloaded, no signal timing strategy alone can conjure
+capacity that does not exist. The Thapathali intersection, like many in
+the Kathmandu valley, operates well beyond its designed throughput
+during peak windows. The physical geometry, lane discipline, and
+competing turning movements create a level of congestion that signal
+optimisation can soften but cannot resolve. The DQN agent improves the
+allocation of insufficient green time; it does not manufacture more road
+space.
+
+This distinction matters for how the results should be interpreted. The
+system performs well precisely where fixed timers fail most obviously,
+and it reaches its natural ceiling precisely where the underlying
+infrastructure is the binding constraint. That ceiling is not an
+algorithmic limitation but an infrastructural one, and it points toward
+what complementary interventions would be needed alongside smarter
+signal control to meaningfully address peak-hour gridlock.
+
+As a proof of concept, this work establishes a credible and reproducible
+foundation. The simulation pipeline, agent design, and evaluation
+framework are all in place. What lies ahead, including real-world
+hardware integration, inclusion of pedestrians and public transport, and
+coordination across multiple connected intersections, are well-defined
+extensions rather than open questions, each building directly on what
+has been demonstrated here.
+
+Urban traffic management in cities like Kathmandu has long depended on
+static, schedule-driven systems that cannot adapt to the variability and
+intensity of real-world demand. This project offers substantive early
+evidence that adaptive, learning-based control can meaningfully close
+that gap, not as a complete solution, but as an important and scalable
+component of one.

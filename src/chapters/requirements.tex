@@ -7,6 +7,8 @@
 \section{Functional Requirements}
 \label{sec:functional_requirements}
 
+This chapter presents a comprehensive analysis of the requirements governing the DQN-based adaptive traffic signal control system. It covers functional, non-functional, hardware, and software requirements that collectively define the expected behavior, performance constraints, and operational environment necessary for successfully simulating and optimizing traffic flow at the Thapathali intersection using SUMO and reinforcement learning, with the aim of outperforming conventional fixed-timer signal control plans.
+
 \begin{table}[H]
     \centering
     \small
@@ -42,8 +44,8 @@
         \textbf{ID} & \textbf{Category} & \textbf{Description} \\
         \midrule
         NFR-001 & Performance & The \gls{dqn} agent shall compute and apply a new traffic signal phase within 1 second per simulation step. \\
-        NFR-002 & Performance & The system shall achieve at least \textbf{15--20\% reduction in average waiting time} compared to the baseline signal plan. \\
-        NFR-003 & Performance & The system shall achieve at least \textbf{10\% increase in vehicle throughput} compared to the baseline. \\
+        NFR-002 & Performance & The system shall achieve at least 15--20\% reduction in average waiting time and queue length compared to the baseline signal plan. \\
+        NFR-003 & Performance & The system shall achieve at least 10\% increase in vehicle throughput compared to the baseline. \\
         NFR-004 & Portability & The system shall be fully operational on Windows 10+ and Ubuntu 20.04+. \\
         NFR-005 & Usability & The system shall provide real-time visualization options (\gls{sumo}-GUI) and clear performance logs. \\
         NFR-006 & Maintainability & The code shall be modular, well-documented, and follow \gls{pep8} conventions. \\
@@ -67,7 +69,7 @@
 \subsection{Software Requirements}
 \label{subsec:software_requirements}
 \begin{itemize}
-    \item \textbf{Operating System:} Windows 10+ or Ubuntu 20.04+.
+    \item \textbf{Operating System:} Windows 10+, MacOS or Ubuntu 20.04+.
     \item \textbf{SUMO:} Eclipse \gls{sumo} 1.26.0 or above.
     \item \textbf{Python:} 3.8 or higher.
     \item \textbf{Key Libraries:} \gls{traci}, pandas, PyTorch, NumPy, Matplotlib.
