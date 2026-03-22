@@ -230,9 +230,10 @@ The state representation used 21 dimensions: 7 origin lane PCU values reflecting
 
 The reward function followed Max-Pressure theory. For each incoming lane, pressure was calculated as incoming vehicle count minus average outgoing vehicle count. The total reward was the negative sum of all lane pressures, encouraging congestion reduction.
 
-\section{Traffic Flow at Thapathali Intersection}
+\section{Traffic Flow and Signal Phase Design at Thapathali Intersection}
 \label{sec:traffic-flow-thapathali}
 
+\subsection{Traffic Flow}
 The traffic movements at the \textbf{Thapathali Intersection} are organized based on the approach roads and controlled through designated signal phases. These movements include straight, left-turn, right-turn, and bypass flows, each corresponding to specific paths within the intersection. The movement directions are defined relative to the forward direction of travel associated with each signal phase.
 
 \begin{figure}[H]
@@ -242,10 +243,8 @@ The traffic movements at the \textbf{Thapathali Intersection} are organized base
     \label{fig:traffic_flow_representation}
 \end{figure}
 
-\subsection{Traffic Flow}
 
-\begin{enumerate}
-    \item \textbf{Traffic Flow from Tripura Marg} \\
+    \textbf{Traffic Flow from Tripura Marg} \\
     Vehicles approaching from Tripura Marg have the following movement options:
     \begin{itemize}
         \item Bypass to Thapathali Road (free-flow movement without signal control)
@@ -253,7 +252,7 @@ The traffic movements at the \textbf{Thapathali Intersection} are organized base
         \item Right turn to Kupondole Road via signal phase T1\_2
     \end{itemize}
 
-    \item \textbf{Traffic Flow from Kupondole Road} \\
+    \textbf{Traffic Flow from Kupondole Road} \\
     Vehicles entering from Kupondole Road can proceed as follows:
     \begin{itemize}
         \item Bypass to Tripura Marg (uncontrolled/free movement)
@@ -261,22 +260,21 @@ The traffic movements at the \textbf{Thapathali Intersection} are organized base
         \item Straight movement (continuation) via signal phase T1\_1
     \end{itemize}
 
-    \item \textbf{Traffic Flow from Maternity Road} \\
+    \textbf{Traffic Flow from Maternity Road} \\
     Vehicles approaching from Maternity Road have:
     \begin{itemize}
         \item Left turn to Kupondole Road
     \end{itemize}
 
-    \item \textbf{Traffic Flow from Thapathali Road} \\
+    \textbf{Traffic Flow from Thapathali Road} \\
     Vehicles from Thapathali Road are allowed the following movements:
     \begin{itemize}
         \item Right turn to Tripura Marg via signal phase T1\_0
         \item Left turn to Maternity Road via signal phase T1\_0
         \item Straight movement to Kupondole Road via signal phase T1\_0
     \end{itemize}
-\end{enumerate}
 
-\subsection{Signal Phase Representation}
+\textbf{Signal Phase Representation}
 \label{sec:signal-phase-representation}
 
 The signal phase identifiers T1\_0, T1\_1, and T1\_2 represent distinct traffic light control stages within the intersection. Each phase governs a specific set of movements from a particular approach, ensuring orderly and conflict-free traffic flow. These phase labels are commonly used in traffic simulation environments such as \gls{sumo} to define internal connection paths and coordinate signal timing with vehicle movements.
@@ -292,10 +290,9 @@ The traffic signal system at the Thapathali Intersection is organized into three
     \label{fig:implemented_signal_phases}
 \end{figure}
 
-\subsection{Traffic Signal Phases}
+\textbf{Traffic Signal Phases}
 
-\begin{enumerate}
-    \item \textbf{Phase P0} \\
+   \textbf{Phase P0} \\
     In Phase P0, traffic flow is primarily allowed from T1\_1, while movements from T1\_2 are fully restricted and T1\_0 is partially permitted.
     \begin{itemize}
         \item \textbf{T1\_1 (Active -- Green):} Vehicles are allowed to move straight to Thapathali Road and turn right to Maternity Road.
@@ -303,24 +300,22 @@ The traffic signal system at the Thapathali Intersection is organized into three
         \item \textbf{T1\_2 (Inactive -- Red):} All movements are stopped via signal phase T1\_2.
     \end{itemize}
 
-    \item \textbf{Phase P1} \\
+   \textbf{Phase P1} \\
     Phase P1 provides \textbf{full priority to T1\_0}, allowing all directional movements, while completely restricting T1\_1 and T1\_2.
     \begin{itemize}
         \item \textbf{T1\_0 (Fully Active -- Green):} Vehicles can perform through movements and right turns freely to Maternity Road and Kupondole Road, respectively. This enables traffic from Thapathali Road to distribute in all directions, including toward Tripura Marg, Maternity Road, and Kupondole Road.
         \item \textbf{T1\_1 (Inactive -- Red):} All movements are stopped via Signal Phase T1\_1.
         \item \textbf{T1\_2 (Inactive -- Red):} All movements are stopped via Signal Phase T1\_2.
     \end{itemize}
-
-    \item \textbf{Phase P2} \\
+textbf{Phase P2} \\
     Phase P2 shifts priority to \textbf{T1\_2}, allowing its movements while restricting others.
     \begin{itemize}
         \item \textbf{T1\_2 (Active -- Green):} Vehicles are allowed to move straight to Maternity Road and turn right to Kupondole Road.
         \item \textbf{T1\_0 (Partially Active):} Some right turn movements to Maternity Road are permitted depending on conflict-free conditions, while others are restricted.
         \item \textbf{T1\_1 (Inactive -- Red):} All movements are stopped via Signal phase T1\_1.
     \end{itemize}
-\end{enumerate}
 
-\subsection{Traffic Signal Control Strategies}
+\textbf{Traffic Signal Control Strategies}
 
 In the fixed-time control approach, the signal operates on a constant cycle length of 60 seconds, where the phases P0, P1, and P2 are activated sequentially with predefined time allocations. This method does not consider real-time traffic conditions and follows a repetitive cycle regardless of traffic demand, making it simple to implement but less efficient under varying traffic conditions.
 

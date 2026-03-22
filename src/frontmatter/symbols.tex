@@ -1,132 +1,228 @@
+
 % Mathematical and scientific symbol definitions for the glossary
 % Symbols are rendered in the List of Symbols with their descriptions
 % Each entry includes a sort key for compatibility with noidx glossary processing
 
-\newglossaryentry{symb:alpha}{
+\newglossaryentry{symb:epsilon}{
     type=symbols,
-    sort=alpha,
-    name={\ensuremath{\alpha}},
-    description={Learning rate or significance level}
+    sort=epsilon,
+    name={\ensuremath{\epsilon}},
+    description={Exploration rate in $\epsilon$-greedy strategy}
 }
 
-\newglossaryentry{symb:beta}{
+\newglossaryentry{symb:epsilon_min}{
     type=symbols,
-    sort=beta,
-    name={\ensuremath{\beta}},
-    description={Decay factor or regularization parameter}
+    sort=epsilon_min,
+    name={\ensuremath{\epsilon_{min}}},
+    description={Minimum exploration rate}
+}
+
+\newglossaryentry{symb:epsilon_decay}{
+    type=symbols,
+    sort=epsilon_decay,
+    name={\ensuremath{\epsilon_{decay}}},
+    description={Epsilon decay factor}
 }
 
 \newglossaryentry{symb:gamma}{
     type=symbols,
     sort=gamma,
     name={\ensuremath{\gamma}},
-    description={Discount factor}
-}
-
-\newglossaryentry{symb:theta}{
-    type=symbols,
-    sort=theta,
-    name={\ensuremath{\theta}},
-    description={Parameter vector or angle}
+    description={Discount factor for future rewards}
 }
 
 \newglossaryentry{symb:lambda}{
     type=symbols,
     sort=lambda,
     name={\ensuremath{\lambda}},
-    description={Eigenvalue or wavelength}
+    description={Reward weighting factor for wait time penalty}
 }
 
-\newglossaryentry{symb:mu}{
+\newglossaryentry{symb:alpha}{
     type=symbols,
-    sort=mu,
-    name={\ensuremath{\mu}},
-    description={Mean or average value}
+    sort=alpha,
+    name={\ensuremath{\alpha}},
+    description={Learning rate for Adam optimiser}
 }
 
-\newglossaryentry{symb:sigma}{
+\newglossaryentry{symb:s_t}{
     type=symbols,
-    sort=sigma,
-    name={\ensuremath{\sigma}},
-    description={Standard deviation or summation operator}
+    sort=s_t,
+    name={\ensuremath{s_t}},
+    description={State vector at decision step $t$}
 }
 
-\newglossaryentry{symb:omega}{
+\newglossaryentry{symb:p_lanes}{
     type=symbols,
-    sort=omega,
-    name={\ensuremath{\Omega}},
-    description={Sample space or angular frequency}
+    sort=p_lanes,
+    name={\ensuremath{p_1 \ldots p_7}},
+    description={PCU-weighted load on origin lanes}
 }
 
-\newglossaryentry{symb:delta}{
+\newglossaryentry{symb:w_lanes}{
     type=symbols,
-    sort=delta,
-    name={\ensuremath{\Delta}},
-    description={Difference or change operator}
+    sort=w_lanes,
+    name={\ensuremath{w_1 \ldots w_6}},
+    description={Maximum waiting time on stopline lanes}
 }
 
-\newglossaryentry{symb:epsilon}{
+\newglossaryentry{symb:p_out}{
     type=symbols,
-    sort=epsilon,
-    name={\ensuremath{\epsilon}},
-    description={Error term or small positive value}
+    sort=p_out,
+    name={\ensuremath{p_{o1} \ldots p_{o5}}},
+    description={PCU-weighted load on outgoing lanes}
 }
 
-\newglossaryentry{symb:pi}{
+\newglossaryentry{symb:R_reward}{
     type=symbols,
-    sort=pi,
-    name={\ensuremath{\pi}},
-    description={Policy function or mathematical constant}
+    sort=R_reward,
+    name={\ensuremath{R}},
+    description={Reward value at current decision step}
 }
 
-\newglossaryentry{symb:nabla}{
+\newglossaryentry{symb:L_stop}{
     type=symbols,
-    sort=nabla,
-    name={\ensuremath{\nabla}},
-    description={Gradient operator}
+    sort=L_stop,
+    name={\ensuremath{L_{stop}}},
+    description={Set of stopline lanes}
 }
 
-\newglossaryentry{symb:partial}{
+\newglossaryentry{symb:L_out}{
     type=symbols,
-    sort=partial,
-    name={\ensuremath{\partial}},
-    description={Partial derivative operator}
+    sort=L_out,
+    name={\ensuremath{L_{out}}},
+    description={Set of outgoing lanes}
 }
 
+\newglossaryentry{symb:PCU_l}{
+    type=symbols,
+    sort=PCU_l,
+    name={\ensuremath{\text{PCU}(l)}},
+    description={Total PCU-weighted vehicle load on lane $l$}
+}
+
+\newglossaryentry{symb:PCU_v}{
+    type=symbols,
+    sort=PCU_v,
+    name={\ensuremath{\text{PCU}(v)}},
+    description={PCU value of individual vehicle $v$}
+}
+
+\newglossaryentry{symb:w_acc}{
+    type=symbols,
+    sort=w_acc,
+    name={\ensuremath{w^{acc}(v)}},
+    description={Accumulated waiting time of vehicle $v$}
+}
+
+\newglossaryentry{symb:Q_target}{
+    type=symbols,
+    sort=Q_target,
+    name={\ensuremath{Q_{target}}},
+    description={Target Q-value from Bellman equation}
+}
+
+\newglossaryentry{symb:Q_current}{
+    type=symbols,
+    sort=Q_current,
+    name={\ensuremath{Q_{current}}},
+    description={Current Q-value from Q-network}
+}
+
+\newglossaryentry{symb:Q_sa}{
+    type=symbols,
+    sort=Q_sa,
+    name={\ensuremath{Q(s, a)}},
+    description={Q-value for state $s$ and action $a$}
+}
+
+\newglossaryentry{symb:s_prime}{
+    type=symbols,
+    sort=s_prime,
+    name={\ensuremath{s'}},
+    description={Next state after action execution}
+}
+
+\newglossaryentry{symb:a_prime}{
+    type=symbols,
+    sort=a_prime,
+    name={\ensuremath{a'}},
+    description={Next action in Bellman update}
+}
+
+\newglossaryentry{symb:r_reward}{
+    type=symbols,
+    sort=r_reward,
+    name={\ensuremath{r}},
+    description={Immediate reward received}
+}
+
+\newglossaryentry{symb:loss}{
+    type=symbols,
+    sort=loss,
+    name={\ensuremath{\mathcal{L}}},
+    description={MSE loss between target and current Q-values}
+}
+
+\newglossaryentry{symb:p_n}{
+    type=symbols,
+    sort=p_n,
+    name={\ensuremath{p_n}},
+    description={Proportion for OD pair $n$ in vehicle allocation}
+}
+
+\newglossaryentry{symb:r_prev}{
+    type=symbols,
+    sort=r_prev,
+    name={\ensuremath{r_n^{prev}}},
+    description={Previous remainder for OD pair $n$}
+}
+
+\newglossaryentry{symb:r_new}{
+    type=symbols,
+    sort=r_new,
+    name={\ensuremath{r_n^{new}}},
+    description={New remainder for OD pair $n$}
+}
+
+\newglossaryentry{symb:a_n}{
+    type=symbols,
+    sort=a_n,
+    name={\ensuremath{a_n}},
+    description={Allocated vehicle count for OD pair $n$}
+}
+
+\newglossaryentry{symb:f_n}{
+    type=symbols,
+    sort=f_n,
+    name={\ensuremath{f_n}},
+    description={Fractional part of allocation for OD pair $n$}
+}
+
+\newglossaryentry{symb:v_c}{
+    type=symbols,
+    sort=v_c,
+    name={\ensuremath{v_c}},
+    description={Total vehicle count for class $c$}
+}
+
+\newglossaryentry{symb:R_remainder}{
+    type=symbols,
+    sort=R_remainder,
+    name={\ensuremath{R}},
+    description={Remainder count in largest remainder method}
+}
+
+\newglossaryentry{symb:floor}{
+    type=symbols,
+    sort=floor,
+    name={\ensuremath{\lfloor \cdot \rfloor}},
+    description={Floor function for integer allocation}
+}
 
 \newglossaryentry{symb:sum}{
     type=symbols,
     sort=sum,
     name={\ensuremath{\sum}},
-    description={Summation}
-}
-
-\newglossaryentry{symb:prod}{
-    type=symbols,
-    sort=prod,
-    name={\ensuremath{\prod}},
-    description={Product}
-}
-
-
-
-\newglossaryentry{symb:approx}{
-    type=symbols,
-    sort=approx,
-    name={\ensuremath{\approx}},
-    description={Approximately equal to}
-}
-
-\newglossaryentry{symb:equiv}{
-    type=symbols,
-    sort=equiv,
-    name={\ensuremath{\equiv}},
-    description={Equivalent to}
-}
-
-\newglossaryentry{symb:subset}{
-    type=symbols,
-    sort=subset,
-    name={\ensuremath{\subset}},
-    description={Subset of operator}
+    description={Summation operator}
 }

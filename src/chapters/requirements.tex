@@ -3,11 +3,12 @@
 \chapter{Requirements Analysis}
 \label{chap:requirements_analysis}
 
+This chapter presents a comprehensive analysis of the requirements governing the DQN-based adaptive traffic signal control system. It covers functional, non-functional, hardware, and software requirements that collectively define the expected behavior, performance constraints, and operational environment necessary for successfully simulating and optimizing traffic flow at the Thapathali intersection using SUMO and reinforcement learning, with the aim of outperforming conventional fixed-timer signal control plans.
 % Functional capabilities that the traffic control system must provide
 \section{Functional Requirements}
 \label{sec:functional_requirements}
 
-This chapter presents a comprehensive analysis of the requirements governing the DQN-based adaptive traffic signal control system. It covers functional, non-functional, hardware, and software requirements that collectively define the expected behavior, performance constraints, and operational environment necessary for successfully simulating and optimizing traffic flow at the Thapathali intersection using SUMO and reinforcement learning, with the aim of outperforming conventional fixed-timer signal control plans.
+The functional requirements define the core capabilities the system must deliver, covering simulation environment setup, DQN agent implementation, real-time traffic state processing, signal control via TraCI, performance metric logging, and baseline comparison between the DQN agent and fixed timer control.
 
 \begin{table}[H]
     \centering
@@ -34,6 +35,8 @@ This chapter presents a comprehensive analysis of the requirements governing the
 \section{Non-Functional Requirements}
 \label{sec:non_functional_requirements}
 
+Non-functional requirements covering performance, reliability, usability, and portability.
+
 \begin{table}[H]
     \centering
     \small
@@ -57,7 +60,7 @@ This chapter presents a comprehensive analysis of the requirements governing the
 % Hardware and software environment needed to run the simulation and training
 \section{System Requirements}
 \label{sec:system_requirements}
-
+The system requirements outline the minimum and recommended hardware specifications necessary to run the SUMO simulation and train the DQN agent, along with the required software dependencies including the SUMO simulation platform, Python environment, and key libraries for deep learning, data processing, and visualisation.
 \subsection{Hardware Requirements}
 \label{subsec:hardware_requirements}
 \begin{itemize}

@@ -5,13 +5,110 @@
 \section{System Architecture}
 \label{sec:system_architecture}
 
-The system employs a \gls{dqn} architecture for traffic signal optimization, integrating \gls{sumo} as the simulation environment with a custom reinforcement learning framework. The state representation module processes real-time traffic data including lane vehicle counts and current phase status into a 22-dimensional feature vector (6 incoming lanes, 12 outgoing lanes, and 4 phase indicators). This vector feeds into dual neural networks: a primary network that updates continuously via backpropagation and a target network that stabilizes training through periodic weight synchronization. The networks feature fully connected hidden layers with 128 and 64 neurons designed to capture complex non-linear relationships in traffic states. A replay buffer stores 10,000 experience tuples to enable batch learning and break temporal correlations, while an $\epsilon$-greedy policy balances exploration and exploitation. The action space comprises four discrete traffic signal controls, with rewards calculated based on the Max-Pressure metric (pressure difference between incoming and outgoing lanes). This modular design ensures stable learning while maintaining real-time responsiveness to dynamic traffic conditions.
+The system employs a Deep Q-Network architecture for adaptive traffic signal control at the Thapathali T1 intersection, integrating the SUMO microscopic traffic simulation platform as the environment with a custom reinforcement learning framework designed specifically for the intersection's geometry and traffic demand characteristics. The overall architecture follows the standard reinforcement learning loop where the agent observes the current state of the intersection, selects a signal control action, receives a reward signal reflecting the quality of that decision, and updates its policy through experience-driven learning.
+
+The state representation module processes real-time traffic data collected at each 15-second decision step through SUMO's TraCI interface. PCU-weighted vehicle loads are computed for the 7 origin lanes approaching the intersection and the 5 outgoing lanes discharging traffic away from it, capturing the instantaneous flow conditions across all major approaches. Maximum waiting times are extracted for each of the 6 stopline lanes, identifying the most severely delayed vehicles queuing at the signal. The currently active signal phase is encoded as a 3-dimensional one-hot vector to inform the agent of its current operating context. Together these components are concatenated into a fixed-length 21-dimensional feature vector that comprehensively represents the intersection status at each decision point.
+
+This state vector feeds into dual neural networks that form the core of the DQN learning mechanism. The Q-network receives the 21-dimensional state vector as input and passes it through three fully connected hidden layers of 128, 64, and 32 neurons respectively using ReLU activation functions, designed to capture complex non-linear relationships between traffic states and optimal signal timing decisions. The output layer produces 2 Q-values, one for each possible action, representing the agent's estimated cumulative future reward for selecting each action from the current state. A separate target network maintains an identical architecture but updates its weights less frequently by periodically copying from the Q-network, providing stable learning targets that prevent oscillations and divergence during training.
+
+A replay buffer stores up to 10,000 past experience tuples, each consisting of the observed state, selected action, received reward, resulting next state, and episode termination flag. During each training step, a random mini-batch of 64 transitions is sampled from this buffer to compute the Q-learning update, breaking the temporal correlations between consecutive experiences and preventing the network from overfitting to recent transitions. This experience replay mechanism significantly improves the stability and sample efficiency of the learning process across the full training run of 300 episodes.
+
+An $\epsilon$-greedy exploration strategy governs action selection throughout training. In early episodes the agent selects actions randomly with high probability, broadly exploring the state space and populating the replay buffer with diverse experiences. As training progresses $\epsilon$ decays multiplicatively after each episode, gradually shifting the agent towards exploiting its learned Q-values for action selection. By the final episodes the agent operates almost entirely on its learned policy, with only a small residual probability of random exploration retained to avoid becoming trapped in suboptimal behaviours.
+
+The action space consists of 2 discrete actions - STAY and NEXT - applied over a cyclic sequence of 3 predefined signal phases. At each 15-second decision interval the agent either maintains the current active phase to continue serving the same traffic direction or advances to the next phase in the cycle to serve a different approach. Each phase transition includes a 3-second yellow interval to ensure safe and real
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{src/images/figures/system_diagram.jpeg} 
     \caption{Block Diagram of DQN-Based Traffic Signal Control System}
     \label{fig:system_block_diagram}
+\end{figure}
+
+
+\section{Use Case Diagram}
+\label{sec:use_case_diagram}
+
+Figure \ref{fig:use_case_diagram} presents the use case diagram for the Thapathali DQN Traffic
+Signal Control System. The system involves four actors: the Traffic
+Engineer, Evaluation Analyst, SUMO Simulator, and DQN Agent. The Traffic
+Engineer initiates the system by configuring the simulation, loading the
+trained model, and starting the simulation. The Evaluation Analyst is
+responsible for generating performance metrics and triggering the
+comparison between the DQN agent and the fixed timer baseline. The SUMO
+Simulator acts as the external simulation environment supporting both
+training and evaluation. The DQN Agent autonomously observes traffic
+state, selects signal actions, stores experiences, applies signal
+phases, and calculates rewards during training. The Train DQN Model use
+case includes five mandatory sub-processes: observe traffic state,
+select signal action, apply signal phase, store experience, and
+calculate reward, all executed at every decision step. Update Standalone
+Signals extends the training process under specific traffic conditions,
+while Compare DQN vs Fixed Timer extends from Generate Performance
+Metrics and triggers the Run Test Scenario use case for evaluation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{src/images/figures/USECASE_REPORT.png}
+    \caption{Use case diagram of the Thapathali DQN traffic signal control system}
+    \label{fig:use_case_diagram}
+\end{figure}
+
+\section{Class Diagram}
+\label{sec:class_diagram}
+
+Figure \ref{fig:class_diagram} presents the class diagram illustrating the structural
+relationships between the five core classes of the system. The TrainDQN
+class serves as the entry point, creating the SumoEnvironment and using
+the DQNAgent to manage the training loop. The SumoEnvironment class
+encapsulates all simulation interaction through SUMO\textquotesingle s
+TraCI interface, maintaining lane-level traffic data and exposing
+methods for state observation, reward calculation, phase control, and
+metric collection. The DQNAgent class manages the reinforcement learning
+logic, holding references to two DQNetwork instances -- the Q-network
+for action selection and the target network for stable learning targets
+-- and a ReplayBuffer for experience storage. The DQNetwork class
+implements the neural network with three fully connected hidden layers.
+The config class acts as a shared configuration module, read by both
+SumoEnvironment and DQNAgent to maintain consistent hyperparameters and
+simulation settings throughout the system. The FixedTimerController
+class operates independently and compares against SumoEnvironment during
+evaluation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{src/images/figures/Class_Diagram.png}
+    \caption{Class diagram of the Thapathali DQN traffic signal control system}
+    \label{fig:class_diagram}
+\end{figure}
+
+\section{Sequence Diagram}
+\label{sec:sequence_diagram}
+
+Figure \ref{fig:sequence_diagram} presents the sequence diagram illustrating the end-to-end
+flow of the system from initialisation through training to final
+evaluation. The traffic engineer triggers the process by calling
+train(), which initialises the DQNAgent with its neural networks and
+replay buffer and the SumoEnvironment, which loads the network and flow
+files into SUMO. During the 300-episode training loop, each episode
+begins with a reset and proceeds through repeated decision steps where
+the agent observes the state, selects an action, and applies the signal
+phase for 15 seconds of green time. When the agent selects NEXT, a
+3-second yellow transition is executed before switching to the next
+phase, ensuring safe and realistic signal operation. The agent then
+receives the reward, stores the experience, and performs a training
+step. After each episode epsilon decays, the target network synchronises
+every 10 episodes, and checkpoints are saved every 5 episodes. Upon
+completion the final model is saved and training plots are generated.
+During evaluation the Evaluation Analyst runs the FixedTimerController
+on the same test scenario to collect baseline metrics, then runs the DQN
+agent in test mode using the saved model to collect DQN metrics, and
+finally compares both results to generate the performance report.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{src/images/figures/Sequence_diagram.png}
+    \caption{Sequence diagram of the Thapathali DQN traffic signal control system}
+    \label{fig:sequence_diagram}
 \end{figure}
 
 % Data sources and field survey methodology used to ground the simulation in real traffic patterns
