@@ -160,26 +160,148 @@ Table \ref{tab:wait_queue_comparison} summarises all three performance metrics h
 \section{Overall Performance Summary and Analysis}
 \label{sec:overall_performance_summary}
 
-The three metrics evaluated-average wait time, average queue length, and throughput efficiency ratio-collectively present a consistent and unambiguous picture: the \gls{dqn} agent outperforms the fixed 60-second controller across every hour of the simulation day and across every dimension of traffic performance.
+The three metrics evaluated - average wait time, average queue length,
+and throughput efficiency ratio - collectively present a consistent and
+unambiguous picture: the DQN agent outperforms the fixed 60-second
+controller across every hour of the simulation day and across every
+dimension of traffic performance.
 
 \subsection{Consistency Across Metrics}
-\label{subsec:consistency_metrics}
-The convergence of all three metrics in favour of the \gls{dqn} policy is analytically significant. A controller that reduces wait time by redistributing green time aggressively toward one approach could, in principle, inflate queue lengths elsewhere. The simultaneous 22.90\% reduction in wait time, 30.06\% reduction in queue length, and 32.65\% improvement in throughput efficiency ratio confirms that no such trade-off occurred; the agent achieved system-wide improvement rather than localised optimisation at the cost of other movements.
+\label{subsec:consistency_across_metrics}
+
+The convergence of all three metrics in favour of the DQN policy is
+analytically significant. A controller that reduces wait time by
+redistributing green time aggressively toward one approach could, in
+principle, inflate queue lengths elsewhere. The simultaneous 22.90\%
+reduction in wait time, 30.06\% reduction in queue length, and 32.65\%
+improvement in throughput efficiency ratio confirm that no such
+trade-off occurred - the agent achieved system-wide improvement rather
+than localised optimisation at the cost of other movements.
 
 \subsection{Throughput Efficiency Ratio Analysis}
-\label{subsec:throughput_efficiency_ratio}
-As shown in Figure \ref{fig:throughput_per_second_of_wait_time}, the throughput efficiency ratio measured as vehicles processed per second of cumulative wait time favoured the \gls{dqn} agent at every hour of the day, with the gap widening notably during peak and late off-peak periods. The overall 32.65\% improvement is the largest gain observed across all three metrics, which is particularly meaningful given that total vehicle throughput remained comparable between the two controllers. This confirms that the \gls{dqn} agent did not improve efficiency by processing more vehicles, but rather by moving the same number of vehicles through the intersection with substantially less cumulative delay. During the morning peak (9--11 AM), the efficiency ratio improved by 9.33\%, and during the evening peak (4--6 PM) by 24.23\%, mirroring the pattern observed in wait time and queue length. The widening gap during evening peak hours suggests that the \gls{dqn} policy is most differentiated from the fixed plan precisely when demand is heaviest and signal timing decisions carry the greatest consequence.
+\label{subsec:throughput_efficiency_ratio_analysis}
+
+As shown in Figure 6-5, the throughput efficiency ratio measured as
+vehicles processed per second of cumulative wait time favoured the DQN
+agent at every hour of the day, with the gap widening notably during
+peak and late off-peak periods. The overall 32.65\% improvement is the
+largest gain observed across all three metrics, which is particularly
+meaningful given that total vehicle throughput remained comparable
+between the two controllers. This confirms that the DQN agent did not
+improve efficiency by processing more vehicles but rather by moving the
+same number of vehicles through the intersection with substantially less
+cumulative delay. During the morning peak (9-11 AM) the efficiency ratio
+improved by 9.33\%, and during the evening peak (4-6 PM) by 24.23\%,
+mirroring the pattern observed in wait time and queue length. The
+widening gap during evening peak hours suggests that the DQN policy is
+most differentiated from the fixed plan precisely when demand is
+heaviest and signal timing decisions carry the greatest consequence.
 
 \subsection{Peak Hour Behaviour}
 \label{subsec:peak_hour_behaviour}
-During the morning peak (9--11 AM), improvements were relatively moderate across all metrics: 8.26\% in wait time, 21.42\% in queue length, and 9.33\% in throughput efficiency compared to the evening peak (4--6 PM), which yielded 19.26\%, 20.89\%, and 24.23\% improvements respectively. This asymmetry is consistent with the nature of the Max-Pressure reward function: the agent responds proportionally to pressure differentials across the four approaches. The evening peak at Thapathali tends to produce more uneven directional demand, giving the adaptive policy greater opportunity to outperform the fixed plan's uniform phase allocation.
+
+During the morning peak (9-11 AM), improvements were relatively moderate
+across all metrics: 8.26\% in wait time, 21.42\% in queue length, and
+9.33\% in throughput efficiency. In contrast, the evening peak (4-6 PM)
+yielded 19.26\%, 20.89\%, and 24.23\% improvements respectively. This
+asymmetry is consistent with the nature of the Max-Pressure reward
+function - the agent responds proportionally to pressure differentials
+across the four approaches. The evening peak at Thapathali tends to
+produce more uneven directional demand, giving the adaptive policy
+greater opportunity to outperform the fixed plan\textquotesingle s
+uniform phase allocation. The morning peak, by contrast, produces more
+symmetric saturation across all approaches simultaneously, leaving less
+room for adaptive improvement over a well-calibrated fixed plan.
 
 \subsection{Variance Reduction}
 \label{subsec:variance_reduction}
-The fixed controller's wait time ranged from 29s to 50s across hours while the \gls{dqn} agent remained within 23--30s. Similarly, queue lengths under the fixed plan sustained 10--13 vehicles during peak hours versus 5.9--10.3 under \gls{dqn}. The throughput efficiency curve in Figure \ref{fig:throughput_per_second_of_wait_time} reflects this same stability; the \gls{dqn} ratio curve is not only higher but smoother than the F60 curve, indicating that the agent maintained consistent processing efficiency rather than producing sporadic bursts of high throughput separated by periods of congestion.
+
+The fixed controller\textquotesingle s wait time ranged from 29s to 50s
+across hours while the DQN agent remained consistently within 23-30s.
+Similarly, queue lengths under the fixed plan sustained 10-13 vehicles
+during peak hours versus 5.9-10.3 under DQN. The throughput efficiency
+curve in Figure 6-5 reflects this same stability - the DQN ratio curve
+is not only higher but smoother than the F60 curve, indicating that the
+agent maintained consistent processing efficiency rather than producing
+sporadic bursts of high throughput separated by periods of congestion.
+This variance reduction is practically significant because it means
+commuters experience more predictable and uniform delay rather than the
+wide swings characteristic of fixed-time control.
 
 \subsection{Off-Peak Performance}
 \label{subsec:off_peak_performance}
-The \gls{dqn} agent's advantage extends into off-peak hours, with queue length falling to 1.83 vehicles by 22:00 compared to 5.0 under the fixed plan, and the throughput efficiency gap remaining visible even at low demand. This reflects the agent's ability to shorten unnecessary red phases when vehicle arrivals are sparse-astructural limitation of fixed-time control that allocates green time uniformly regardless of actual demand, thereby accumulating wait time even when queues are minimal.
 
-Taken together, these results confirm that the \gls{dqn} policy learned a generalisable and robust signal control strategy, not merely one optimised for a narrow demand condition. The consistency of improvement across wait time, queue length, and throughput efficiency and the alignment of their peak-hour patterns indicates that all three metrics are capturing the same underlying phenomenon: the \gls{dqn} agent allocates green time more precisely in response to real-time intersection state, reducing both the duration and the downstream consequences of vehicle delay. The hour-by-hour breakdown in Table \ref{tab:wait_queue_comparison} supports this interpretation, showing no hour in which the fixed controller equals or surpasses the \gls{dqn} on any metric.
+The DQN agent\textquotesingle s advantage extends clearly into off-peak
+hours, with queue length falling to 1.83 vehicles by 22:00 compared to
+5.0 under the fixed plan, and the throughput efficiency gap remaining
+visible even at low demand. This reflects the agent\textquotesingle s
+ability to shorten unnecessary red phases when vehicle arrivals are
+sparse - a structural limitation of fixed-time control that allocates
+green time uniformly regardless of actual demand, thereby accumulating
+wait time even when queues are minimal. The 47.17\% wait time
+improvement at 21:00 is the single largest hourly gain recorded,
+highlighting precisely how wasteful fixed-cycle operation becomes during
+low-demand periods.
+
+\subsection{Failure Case Analysis}
+\label{subsec:failure_case_analysis}
+
+While the DQN agent demonstrated consistent improvement over the fixed
+timer across all hours and metrics, several failure cases and structural
+limitations were identified that qualify the scope of these results:
+
+\begin{itemize}
+\item
+  \textbf{Peak-hour saturation:} The most significant failure case
+  occurs during 10:00-11:00 where the wait time improvement falls to
+  just 2.65\%, indicating that the agent\textquotesingle s adaptive
+  advantage essentially disappears when all approaches are
+  simultaneously overloaded. This is not an algorithmic failure but an
+  infrastructural constraint - the Thapathali intersection operates
+  beyond its designed capacity during peak windows and no signal timing
+  strategy alone can resolve that.
+\item
+  \textbf{Reward signal degradation during saturation:} The Max-Pressure
+  reward compares stopline PCU against outgoing PCU but stopline lanes
+  at Thapathali are short and fill almost instantly during peak hours,
+  making the pressure signal nearly constant regardless of what the
+  agent does. This reduces the quality of the learning signal precisely
+  during the periods where better control would matter most.
+\item
+  \textbf{Absence of real downstream network modelling:} Random timer
+  signals were placed at outgoing lane ends to simulate backspill but
+  these were not calibrated to actual neighbouring intersection
+  behaviour, meaning the agent may have learned a policy optimised for
+  an artificial downstream condition that does not fully reflect
+  reality.
+\item
+  \textbf{Exclusion of non-motorised and multi-modal traffic:} The
+  simulation excludes pedestrians, public transport, and non-motorised
+  vehicles which are present at the real Thapathali intersection. Their
+  omission means the agent operates in a cleaner environment than would
+  exist in actual deployment, and real-world performance could differ
+  meaningfully from simulation results.
+\item
+  \textbf{Limited training data diversity:} The training was conducted
+  exclusively on four days of observed traffic data, limiting the
+  diversity of demand patterns the agent was exposed to. Unusual traffic
+  conditions such as accidents, festivals, road closures, or sudden
+  demand surges were not represented in training, and the
+  agent\textquotesingle s ability to generalise to such scenarios
+  remains untested.
+\end{itemize}
+
+\subsection{Summary}
+\label{subsec:summary}
+
+Taken together, these results confirm that the DQN policy learned a
+generalisable and robust signal control strategy, not merely one
+optimised for a narrow demand condition. The consistency of improvement
+across wait time, queue length, and throughput efficiency and the
+alignment of their peak-hour patterns indicate that all three metrics
+are capturing the same underlying phenomenon-the DQN agent allocates
+green time more precisely in response to real-time intersection state,
+reducing both the duration and the downstream consequences of vehicle
+delay. The hour-by-hour breakdown in Table 6.6.1 supports this
+interpretation, showing no hour in which the fixed controller equals or
+surpasses the DQN on any metric.

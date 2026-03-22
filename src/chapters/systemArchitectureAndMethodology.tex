@@ -249,6 +249,70 @@ R = -\left(\sum_{l \in L_{\text{stop}}} \text{PCU}(l) - \sum_{l \in L_{\text{out
 \end{itemize}
 
 
+\section{Design Justification}
+\label{sec:design_justification}
+
+Several reward formulations were considered before adopting the
+Max-Pressure based reward. A pure delay-based reward penalising total
+accumulated waiting time across all vehicles was ruled out because
+accumulated waiting time grows unboundedly within an episode, causing
+Q-value targets to grow without bound and leading to loss divergence
+during training. A throughput-only reward rewarding the agent purely for
+vehicles cleared was also considered but rejected because outgoing lane
+flow at Thapathali is heavily influenced by road width and geometry
+rather than signal decisions alone, meaning the agent would learn to
+favour wider outgoing lanes regardless of which approach actually had
+the heaviest queue.
+
+The adopted formulation is grounded in Max-Pressure theory, which has
+theoretical throughput optimality properties under certain demand
+conditions and has been validated in prior DRL traffic signal control
+literature. The first term computes the pressure difference between
+stopline PCU accumulation and outgoing PCU discharge - directly
+measuring whether the agent\textquotesingle s current phase choice is
+clearing vehicles efficiently. The second term adds a PCU-weighted
+accumulated waiting time penalty scaled by \$\textbackslash lambda =
+0.0004\$, discouraging the agent from ignoring any single approach for
+extended periods. The \$\textbackslash lambda\$ value was calibrated to
+keep the wait penalty secondary to the throughput objective, preventing
+the agent from sacrificing overall flow in favour of minimising wait
+time on a single approach.
+
+\subsection{Impact on Learning}
+\label{subsec:impact_on_learning}
+
+The reward function directly shapes the Q-value targets the agent learns
+from at every training step. The pressure term
+\$-(\textbackslash sum\_\{l \textbackslash in L\_\{stop\}\}
+\textbackslash text\{PCU\}(l) - \textbackslash sum\_\{l
+\textbackslash in L\_\{out\}\} \textbackslash text\{PCU\}(l))\$ provides
+an instantaneous signal that reflects the current state of the
+intersection - when the agent selects the correct phase, outgoing PCU
+increases and stopline PCU decreases, producing a less negative reward
+that reinforces the action. When the agent holds the wrong phase,
+stopline PCU accumulates and outgoing PCU stays low, producing a more
+negative reward that discourages the action. This direct
+cause-and-effect relationship between phase selection and reward is
+essential for stable Q-value learning.
+
+The accumulated wait penalty \$\textbackslash lambda
+\textbackslash sum\_\{v\} \textbackslash text\{PCU\}(v)
+\textbackslash cdot w\^{}\{acc\}(v)\$ complements the pressure term by
+introducing a fairness objective-the agent is penalised for vehicles
+that have been waiting for extended periods regardless of which lane
+they occupy. This prevents the agent from learning a degenerate policy
+that maximises throughput on one high-flow approach while consistently
+starving lower-volume approaches of green time.
+
+Together the two terms ensure that the agent learns to balance both
+efficiency -clearing the maximum number of PCU per unit time - and
+equity - preventing excessive delay accumulation on any single approach.
+This dual objective aligns directly with the project\textquotesingle s
+performance metrics of average wait time reduction and throughput
+efficiency improvement, ensuring that what the agent optimises during
+training corresponds to what is measured during evaluation.
+
+
 \subsection{Neural Network Architecture}
 
 The agent was implemented using a deep neural network with one input layer, three hidden layers of 128, 64, and 32 neurons respectively, and an output layer with two action values corresponding to STAY and NEXT. The input layer accepts the 21-dimensional state vector representing current intersection conditions. ReLU activation functions were applied after each hidden layer to introduce non-linearity. The output layer produces Q-values for each of the two possible actions, from which the agent selects the action with the highest estimated future reward.
