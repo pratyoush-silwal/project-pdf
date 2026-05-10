@@ -2,9 +2,9 @@
 \label{chap:implementation_details}
 
 % Summary of the DQN-based approach for adaptive traffic signal control at Thapathali
-This project focuses on developing an intelligent traffic control system using \gls{dqn} to optimize traffic flow at the Thapathali Intersection in Kathmandu. By applying \gls{dqn}, the system dynamically adjusts traffic light phases based on real-time data such as vehicle density, waiting times, and congestion levels. The primary objective is to minimize vehicle wait times and enhance traffic throughput by learning and implementing the most efficient signal phases.
+The implementation was built around one practical question: can a trained controller choose better phase changes than a fixed 60-second plan for the Thapathali intersection under the same traffic demand? To answer this, the project combines a \gls{sumo} network, generated vehicle flows, and a DQN controller connected through \gls{traci}. The agent does not directly set arbitrary green durations; instead, every 15 seconds it decides whether to keep the current phase or move to the next phase in the predefined cycle.
 
-The system utilizes \gls{sumo} for simulating traffic scenarios and \gls{traci} to enable real-time interaction between the \gls{dqn} model and the traffic simulation. This integration allows the \gls{dqn} model to control traffic signal phases, assess the impact of its actions, and continuously improve the traffic flow based on the simulation feedback.
+This design keeps the control problem small enough to train and inspect while still reflecting the main operational decision at the junction. \gls{traci} provides the lane-level vehicle counts, waiting times, and phase-control commands needed during training and evaluation. The same simulation setup is then reused for the fixed-timer baseline so that differences in results come from the controller policy rather than from different traffic inputs.
 
 % Algorithms for distributing vehicle counts across origin-destination pairs using proportional allocation
 \section{Vehicle Flow Generation}

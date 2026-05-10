@@ -3,12 +3,12 @@
 \chapter{Requirements Analysis}
 \label{chap:requirements_analysis}
 
-This chapter presents a comprehensive analysis of the requirements governing the DQN-based adaptive traffic signal control system. It covers functional, non-functional, hardware, and software requirements that collectively define the expected behavior, performance constraints, and operational environment necessary for successfully simulating and optimizing traffic flow at the Thapathali intersection using SUMO and reinforcement learning, with the aim of outperforming conventional fixed-timer signal control plans.
+This chapter defines the requirements used to keep the project implementation bounded and testable. The system is a simulation-based DQN controller for the Thapathali intersection, so the requirements focus on what must be prepared in SUMO, what the agent must observe and control, what metrics must be logged, and what minimum environment is needed to reproduce the experiments.
 % Functional capabilities that the traffic control system must provide
 \section{Functional Requirements}
 \label{sec:functional_requirements}
 
-The functional requirements define the core capabilities the system must deliver, covering simulation environment setup, DQN agent implementation, real-time traffic state processing, signal control via TraCI, performance metric logging, and baseline comparison between the DQN agent and fixed timer control.
+The functional requirements define the capabilities needed for the experiment to be meaningful: the same traffic scenario must run under both the DQN controller and the fixed-timer baseline, and the system must record enough information to compare their behaviour after simulation.
 
 \begin{table}[H]
     \centering
@@ -35,7 +35,7 @@ The functional requirements define the core capabilities the system must deliver
 \section{Non-Functional Requirements}
 \label{sec:non_functional_requirements}
 
-Non-functional requirements covering performance, reliability, usability, and portability.
+The non-functional requirements describe practical constraints for running and checking the project, including simulation speed, portability, logging, and maintainability.
 
 \begin{table}[H]
     \centering

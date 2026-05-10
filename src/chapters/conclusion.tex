@@ -5,81 +5,43 @@
 \section{Achievements}
 \label{sec:achievements}
 
-The following Achievements were achieved in this project:
+The main project achievements are summarised below:
 
 \begin{itemize}
-\item
-  Data collection and vehicle allocation from relevant sources.
-\item
-  Configuration of SUMO for the Thapathali intersection, including road
-  layout,traffic flow, and signal configuration.
-\item
-  Setup of the simulation environment for testing the traffic control
-  system.
-\item
-  Fixed-timer logic configuration for baseline comparison.
-\item
-  DQN agent design and implementation for traffic signal optimisation.
-\item
-  The average waiting time over the 16-hour period (6 AM to 10 PM) was
-  reduced by 22.90\%.
-\item
-  The average queue length over the 16-hour period was reduced by
-  30.06\%.
-\item
-  The average throughput per waiting second over the 16-hour period
-  improved by 32.65\%.
+  \item Traffic-demand data was converted into vehicle flows suitable for the SUMO simulation, including PCU-based vehicle classes and OD allocation.
+  \item The Thapathali intersection was configured in SUMO with road layout, traffic flow, and signal-phase representation.
+  \item A fixed 60-second signal controller was implemented as the baseline for comparison.
+  \item A DQN-based controller was designed and trained for adaptive signal phase selection.
+  \item On the evaluated 6 AM to 10 PM period, average waiting time was reduced by 22.90\% compared with the fixed baseline.
+  \item Average queue length was reduced by 30.06\%, and throughput per waiting second improved by 32.65\%.
 \end{itemize}
 
 % Constraints, shortcomings, and areas where further work is warranted
 \section{Limitations}
 \label{sec:limitations}
 
-Some factors were not considered or implemented in the current system;
-these are outlined below as limitations.
+The results should be interpreted with the following limitations in mind:
 
 \begin{itemize}
-\item
-  No hardware implementation or real-world field testing with traffic
-  signals.
-\item
-  Pedestrians and public transport are excluded in this phase to keep
-  the control problem
-\item
-  tractable and focus on vehicle-delay reduction at Thapathali; modeling
-  them requires
-\item
-  additional constraints and reliable data.
-\item
-  Extreme scenarios or multi-modal integration, like ride-sharing or
-  parking systems,
-\item
-  are not considered.
-\item
-  Random traffic signal timers were placed at the end of outgoing lanes
-  to simulate network backspill; however, these were not based on the
-  actual traffic conditions of the neighbouring network
+  \item The controller was tested only in simulation; no hardware signal controller or field trial was implemented.
+  \item Pedestrians and public transport were excluded to keep the control problem tractable and focused on vehicle-delay reduction at Thapathali.
+  \item Unusual traffic conditions such as accidents, road closures, festivals, or sudden diversions were not represented in the training data.
+  \item Random traffic signal timers were placed near outgoing lanes to approximate downstream backspill, but they were not calibrated using actual neighbouring-intersection data.
+  \item The study considers one intersection only, so it does not capture network-wide coordination effects.
 \end{itemize}
 
 % Directions for extending this work in scope, methodology, or deployment
 \section{Future Work}
 \label{sec:future_work}
 
-Future development may include:
+Future work can extend the project in the following directions:
 
 \begin{itemize}
-\item
-  Multi-Intersection Coordination: Scaling the system to manage multiple
-  connected intersections.
-
-  \item 
-Faster Training Using Alternative Simulators: The current training pipeline relies on SUMO, which, while realistic, is computationally intensive and limits the speed at which the agent can be trained across large numbers of episodes. Future work could explore lightweight traffic simulation platforms such as CityFlow, which is specifically designed for large-scale reinforcement learning research and can simulate traffic significantly faster than SUMO by sacrificing some physical realism.
-\item
-  Advanced Optimization: Exploring hybrid algorithms or multi-agent RL
-  for more
+  \item \textbf{Multi-intersection coordination:} Extend the controller to nearby connected intersections so that one junction's discharge pattern does not create unmanaged pressure downstream.
+  \item \textbf{Faster training experiments:} Compare SUMO with lighter simulators such as CityFlow to test more episodes and demand variations, while noting the trade-off between speed and physical realism.
+  \item \textbf{Richer traffic modes:} Add pedestrians, buses, public transport stops, and non-motorised traffic so that the controller reflects more of the real Thapathali operating environment.
+  \item \textbf{Robustness testing:} Evaluate the trained policy under abnormal demand patterns such as sudden surges, lane blockage, and event-day traffic.
 \end{itemize}
-
-complex network topologies.
 
 % Closing statement on the project's overall contribution and significance
 \section{Final Remarks}
