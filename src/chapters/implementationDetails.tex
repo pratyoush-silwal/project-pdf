@@ -2,9 +2,9 @@
 \label{chap:implementation_details}
 
 % Summary of the DQN-based approach for adaptive traffic signal control at Thapathali
-The implementation was built around one practical question: can a trained controller choose better phase changes than a fixed 60-second plan for the Thapathali intersection under the same traffic demand? To answer this, the project combines a \gls{sumo} network, generated vehicle flows, and a DQN controller connected through \gls{traci}. The agent does not directly set arbitrary green durations; instead, every 15 seconds it decides whether to keep the current phase or move to the next phase in the predefined cycle.
+The implementation was built around one practical question: can a trained controller choose better phase changes than a fixed 60-second plan for Thapathali under the same traffic demand? The project therefore combines three pieces: a \gls{sumo} network, generated vehicle flows, and a DQN controller connected through \gls{traci}. The agent does not set arbitrary green durations. Every 15 seconds it makes a smaller decision: keep the current phase or move to the next phase in the predefined cycle.
 
-This design keeps the control problem small enough to train and inspect while still reflecting the main operational decision at the junction. \gls{traci} provides the lane-level vehicle counts, waiting times, and phase-control commands needed during training and evaluation. The same simulation setup is then reused for the fixed-timer baseline so that differences in results come from the controller policy rather than from different traffic inputs.
+This design keeps the control problem small enough to train and inspect while still reflecting the main operational decision at the junction. \gls{traci} provides the lane-level vehicle counts, waiting times, and phase-control commands needed during training and evaluation. The fixed-timer baseline uses the same simulation setup, so the comparison is driven by the control policy rather than by different traffic inputs.
 
 % Algorithms for distributing vehicle counts across origin-destination pairs using proportional allocation
 \section{Vehicle Flow Generation}
@@ -137,11 +137,11 @@ This design keeps the control problem small enough to train and inspect while st
 \section{Traffic Simulation Environment (SUMO)}
 \label{sec:sumo_environment}
 
-To simulate the traffic environment and test our \gls{dqn}-based traffic signal control system, we used \gls{sumo}, an open-source tool for traffic modeling. Below are the steps and configurations involved in setting up the simulation.
+The traffic environment was simulated in \gls{sumo}, which provided enough detail for lane-level queues, vehicle classes, and signal phases without requiring field deployment. The main configuration files used in the implementation are described below.
 
 \subsection{SUMO Configuration Files}
 \label{subsec:sumo_config}
-The implementation of \gls{sumo} environment involved the fine-tuning of various parameters to optimize the traffic signal control for the Thapathali intersection. The following parameters were modified or explicitly set in the \gls{sumo} configuration files. All parameters that were not explicitly specified or tuned in the configuration files default to \gls{sumo}'s standard settings. This ensures that the simulation remains consistent with \gls{sumo}'s standard behavior while allowing for the fine-tuning and optimization necessary for this project \cite{SUMO2025}.
+The \gls{sumo} environment required several configuration files. Each file controlled a different part of the experiment: the road network, vehicle behaviour, generated routes, and simulation runtime settings. Parameters not explicitly set in these files were left at SUMO's default values to avoid unnecessary tuning outside the project scope \cite{SUMO2025}.
 
 \subsection{\texttt{map.net.xml}}
 \label{subsec:map_net_xml}
@@ -224,9 +224,9 @@ To ensure high accuracy in vehicle positioning and lane-changing behavior, a lat
 \section{Environment Wrapper Implementation}
 \label{sec:env_wrapper}
 
-The SumoEnvironment class provided the interface between the SUMO simulation and the reinforcement learning agent. The reset() method initialised each episode by restarting the SUMO simulation and resetting all internal state variables. The step(action) method executed the selected traffic signal action over a 15-second decision window, collecting rewards at each simulation step and returning the averaged reward, next state, and episode metrics upon completion. The \_get\_state() method extracted the 21-dimensional state vector comprising PCU-weighted vehicle loads on origin and outgoing lanes, maximum waiting times on stopline lanes, and a one-hot encoding of the current active phase. The \_calculate\_reward() method computed the reward by comparing stopline PCU against outgoing PCU discharge and adding a PCU-weighted accumulated waiting time penalty. The traffic light phases were controlled through SUMO's TraCI interface, with phase transitions managed internally by the environment.
+The SumoEnvironment class acts as the boundary between SUMO and the reinforcement learning code. The reset() method starts a new episode and clears the internal counters. The step(action) method applies the selected signal decision for a 15-second window, collects rewards during that window, and returns the next state with episode metrics. The \_get\_state() method extracts the 21-dimensional state vector from lane loads, stopline waiting times, outgoing PCU values, and the active phase. The \_calculate\_reward() method compares stopline PCU against outgoing PCU discharge and then adds the PCU-weighted waiting-time penalty. Signal changes are finally applied through TraCI, including the yellow transition between phases.
 
-The state representation used 21 dimensions: 7 origin lane PCU values reflecting approaching traffic volume, 6 stopline lane maximum waiting times capturing queue severity at the signal, 5 outgoing lane PCU values reflecting current discharge flow through the intersection, and 3 phase indicators encoded as one-hot vectors representing the currently active phase (P1, P2, P3). The action space consisted of 2 discrete actions - STAY and NEXT - operating over a cyclic sequence of three signal phases.
+The state representation has 21 dimensions. Seven values describe origin-lane PCU load, six values record maximum waiting time at stopline lanes, five values represent outgoing-lane PCU load, and three one-hot values indicate the active phase. The action space remains deliberately small: STAY or NEXT over the three-phase cycle.
 
 The reward function followed Max-Pressure theory. For each incoming lane, pressure was calculated as incoming vehicle count minus average outgoing vehicle count. The total reward was the negative sum of all lane pressures, encouraging congestion reduction.
 

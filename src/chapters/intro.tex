@@ -5,13 +5,13 @@
 \section{Background}
 \label{sec:background}
 
-Kathmandu's traffic problem is most visible at intersections where several high-demand approaches compete for limited green time. Thapathali is a clear example: vehicles arrive from Maitighar, Kupondole, Tripureshwor, and Maternity with demand that changes by hour and direction. In practice, signal operation still depends on fixed timing plans, camera observation, and manual intervention by traffic police. These methods can work under ordinary flow, but they are slow to react when one approach suddenly builds a queue or when peak-hour demand becomes uneven. This project therefore narrows the problem to intersection-level signal control at Thapathali instead of attempting to model city-wide traffic management.
+Kathmandu's traffic problem becomes most visible at intersections, where several busy approaches compete for the same green time. Thapathali is a useful case for study because vehicles enter from Maitighar, Kupondole, Tripureshwor, and Maternity, and the dominant movement changes during the day. In practice, signal operation still relies on fixed timing plans, camera observation, and manual intervention by traffic police. These methods are understandable and easy to operate, but they react slowly when a queue forms suddenly or when peak-hour demand becomes uneven. For that reason, this report studies intersection-level signal control at Thapathali rather than attempting to model the whole Kathmandu road network.
 
 % Rationale for applying deep reinforcement learning to traffic signal optimization
 \section{Motivation}
 \label{sec:motivation}
 
-The motivation for using \gls{drl} comes from the way the control problem is observed in the field. A fixed plan gives each phase a pre-decided share of time even when the actual queue distribution has changed. At Thapathali, this means green time may be spent on a lightly loaded direction while another approach continues to accumulate waiting vehicles. A learning-based controller is worth studying because it can repeatedly observe the current state, test an action in simulation, and improve its phase-selection policy from the resulting delay and queue behaviour.
+The motivation for using \gls{drl} comes from a practical limitation of fixed timing. A fixed plan gives each phase a pre-decided share of time, even when the actual queue distribution has changed. At Thapathali, that can mean serving a lightly loaded direction while another approach continues to build a queue. A learning-based controller is worth testing because it can observe the current state, apply a phase decision in simulation, and update its policy from the resulting delay and queue behaviour.
 
 This work uses \gls{sumo} because real signal experiments at a busy Kathmandu junction would be unsafe and administratively difficult for a minor project. The simulation provides a controlled environment where the same Day 5 traffic demand can be tested under both a fixed 60-second plan and a trained DQN policy. The purpose is not to claim immediate field deployment, but to check whether the adaptive controller gives a measurable improvement under a realistic representation of the intersection.
 
@@ -21,13 +21,13 @@ This work uses \gls{sumo} because real signal experiments at a busy Kathmandu ju
 
 The main problem addressed in this project is the mismatch between fixed signal timing and changing traffic demand at Thapathali. A controller that does not observe the current queue condition may hold a phase longer than necessary or switch too late when another approach is already congested. This increases waiting time, queue length, and the chance of spillback into nearby links.
 
-The project hypothesis is that a \gls{dqn}-based controller can reduce average waiting time and queue length compared with fixed-time control under the same simulated demand. The expected advantage comes from using real-time state information such as PCU-weighted lane loads, stopline waiting time, and the current phase, instead of relying only on pre-set splits. The limitation is also clear: if all approaches are saturated at the same time, the controller can only allocate scarce green time more carefully; it cannot create additional road capacity.
+The project hypothesis is that a \gls{dqn}-based controller can reduce average waiting time and queue length compared with fixed-time control under the same simulated demand. Its advantage should come from using real-time state information, including PCU-weighted lane loads, stopline waiting time, and the current phase, instead of relying only on pre-set splits. The expected benefit is not unlimited. If all approaches are saturated at the same time, the controller can only distribute scarce green time more carefully; it cannot create additional road capacity.
 
 % Primary and measurable goals of the project
 \section{Objectives}
 \label{sec:objectives}
 
-The project objectives are kept measurable so that the proposed controller can be judged against a baseline rather than discussed only conceptually:
+The objectives were defined so that the controller could be evaluated against a baseline rather than described only at a conceptual level:
 
 \begin{itemize}
     \item To prepare a \gls{sumo} simulation of the Thapathali intersection using available road geometry, OD data, vehicle counts, and PCU-based vehicle classes.
@@ -51,4 +51,3 @@ The main scope items are:
     \item Designing the DQN controller around the selected state representation, STAY/NEXT action space, and Max-Pressure based reward.
     \item Evaluating the trained policy against a fixed 60-second signal plan using average waiting time, queue length, and throughput efficiency.
 \end{itemize}
-

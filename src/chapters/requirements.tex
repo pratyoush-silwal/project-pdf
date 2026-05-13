@@ -3,12 +3,12 @@
 \chapter{Requirements Analysis}
 \label{chap:requirements_analysis}
 
-This chapter defines the requirements used to keep the project implementation bounded and testable. The system is a simulation-based DQN controller for the Thapathali intersection, so the requirements focus on what must be prepared in SUMO, what the agent must observe and control, what metrics must be logged, and what minimum environment is needed to reproduce the experiments.
+This chapter records the requirements that kept the implementation bounded and testable. Since the project is a simulation-based DQN controller for Thapathali, the requirements focus on four practical concerns: preparing the SUMO network, exposing the traffic state to the agent, logging comparable metrics, and keeping the software environment reproducible.
 % Functional capabilities that the traffic control system must provide
 \section{Functional Requirements}
 \label{sec:functional_requirements}
 
-The functional requirements define the capabilities needed for the experiment to be meaningful: the same traffic scenario must run under both the DQN controller and the fixed-timer baseline, and the system must record enough information to compare their behaviour after simulation.
+The functional requirements are written around the experiment itself. The same traffic scenario must run under both the DQN controller and the fixed-timer baseline, and the system must record enough information to compare the two policies after simulation.
 
 \begin{table}[H]
     \centering
@@ -35,7 +35,7 @@ The functional requirements define the capabilities needed for the experiment to
 \section{Non-Functional Requirements}
 \label{sec:non_functional_requirements}
 
-The non-functional requirements describe practical constraints for running and checking the project, including simulation speed, portability, logging, and maintainability.
+The non-functional requirements describe the practical constraints for running the project repeatedly, including simulation speed, portability, logging, and maintainability.
 
 \begin{table}[H]
     \centering
@@ -60,7 +60,7 @@ The non-functional requirements describe practical constraints for running and c
 % Hardware and software environment needed to run the simulation and training
 \section{System Requirements}
 \label{sec:system_requirements}
-The system requirements outline the minimum and recommended hardware specifications necessary to run the SUMO simulation and train the DQN agent, along with the required software dependencies including the SUMO simulation platform, Python environment, and key libraries for deep learning, data processing, and visualisation.
+The system requirements list the hardware and software needed to reproduce the simulation and training workflow. The project was designed to run on ordinary student hardware, although longer DQN training runs benefit from more memory, faster storage, or access to GPU-backed environments such as Google Colab.
 \subsection{Hardware Requirements}
 \label{subsec:hardware_requirements}
 \begin{itemize}

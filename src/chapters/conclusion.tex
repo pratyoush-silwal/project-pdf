@@ -47,56 +47,41 @@ Future work can extend the project in the following directions:
 \section{Final Remarks}
 \label{sec:final_remarks}
 
-This project set out to investigate whether a reinforcement
-learning-based approach could meaningfully improve traffic signal
-control at the Thapathali intersection in Kathmandu, one of the
-city\textquotesingle s most persistently congested arterial junctions.
-The results suggest that it can, and the case for adaptive signal
-control is stronger than the numbers alone convey.
+This project investigated whether a reinforcement learning controller
+could improve signal operation at the Thapathali intersection under
+the same simulated demand used for a fixed-time baseline. The result is
+not a claim that DQN is a complete solution for Kathmandu traffic. It
+does show, however, that an adaptive controller can make better use of
+green time when the traffic state is uneven across approaches.
 
-The DQN agent demonstrated consistent improvement over fixed-timer logic
-across the full operational window. Where the gains are most evident is
-during low-to-moderate demand periods, hours where fixed timing is
-structurally wasteful, holding vehicles at red signals long after
-opposing flows have cleared. In these windows, the
-agent\textquotesingle s ability to read and react to real-time queue
-states yielded noticeably better outcomes, highlighting just how rigid
-and inefficient schedule-based control becomes when traffic is light and
-variable.
+The clearest improvement appears during low-to-moderate demand periods.
+In those hours, a fixed cycle can continue serving an approach even
+after most of its vehicles have cleared, while another direction waits.
+The DQN agent reduced this waste by using the observed queue state when
+deciding whether to hold or advance the phase.
 
-The more telling story, however, lies in the peak hours. Improvements
-during high-demand periods, the morning and evening surges that define
-Kathmandu\textquotesingle s daily congestion profile, were comparatively
-modest. This is not a failure of the algorithm; it is a reflection of a
-harder problem. At genuine saturation, when every approach is
-simultaneously overloaded, no signal timing strategy alone can conjure
-capacity that does not exist. The Thapathali intersection, like many in
-the Kathmandu valley, operates well beyond its designed throughput
-during peak windows. The physical geometry, lane discipline, and
-competing turning movements create a level of congestion that signal
-optimisation can soften but cannot resolve. The DQN agent improves the
-allocation of insufficient green time; it does not manufacture more road
-space.
+The peak-hour result is more limited. When all approaches are heavily
+loaded at the same time, the controller has less freedom to improve the
+outcome because every movement needs service. In that situation, signal
+optimisation can reduce some delay, but it cannot overcome the physical
+capacity of the junction, lane discipline, and competing turning
+movements. The DQN agent can allocate insufficient green time more
+carefully; it cannot create more road space.
 
-This distinction matters for how the results should be interpreted. The
-system performs well precisely where fixed timers fail most obviously,
-and it reaches its natural ceiling precisely where the underlying
-infrastructure is the binding constraint. That ceiling is not an
-algorithmic limitation but an infrastructural one, and it points toward
-what complementary interventions would be needed alongside smarter
-signal control to meaningfully address peak-hour gridlock.
+This distinction is important for interpreting the results. The system
+performs best where fixed timing is visibly wasteful, and its gains
+become smaller where infrastructure capacity becomes the main
+constraint. For peak-hour gridlock, adaptive signal control would need
+to be combined with other interventions, such as downstream coordination
+or improved handling of public transport and pedestrian movements.
 
-As a proof of concept, this work establishes a credible and reproducible
-foundation. The simulation pipeline, agent design, and evaluation
-framework are all in place. What lies ahead, including real-world
-hardware integration, inclusion of pedestrians and public transport, and
-coordination across multiple connected intersections, are well-defined
-extensions rather than open questions, each building directly on what
-has been demonstrated here.
+As a proof of concept, the project leaves behind a reproducible
+simulation pipeline, a defined DQN controller, and a fixed-time baseline
+for comparison. The next steps are also clear: field validation,
+pedestrian and public-transport modelling, and coordination with nearby
+intersections.
 
-Urban traffic management in cities like Kathmandu has long depended on
-static, schedule-driven systems that cannot adapt to the variability and
-intensity of real-world demand. This project offers substantive early
-evidence that adaptive, learning-based control can meaningfully close
-that gap, not as a complete solution, but as an important and scalable
-component of one.
+The main contribution is therefore modest but useful. Adaptive,
+learning-based signal control is not a stand-alone answer to Kathmandu's
+traffic congestion, but the Thapathali results show that it can be a
+practical component of a wider traffic-management strategy.

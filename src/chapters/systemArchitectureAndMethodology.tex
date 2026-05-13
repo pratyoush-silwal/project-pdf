@@ -5,15 +5,15 @@
 \section{System Architecture}
 \label{sec:system_architecture}
 
-The system uses a Deep Q-Network controller with SUMO as the traffic environment. The design was kept close to the actual decision available at a signal: at a fixed decision interval, the controller can either hold the current phase or move to the next phase in the cycle. This avoids an unnecessarily large action space while still allowing the agent to respond to changing queue conditions at Thapathali T1.
+The system uses a Deep Q-Network controller with SUMO as the traffic environment. During design, the control action was kept close to what a traffic signal can realistically do: at a fixed decision interval, the controller can either hold the current phase or move to the next phase in the cycle. This avoids an unnecessarily large action space while still allowing the agent to respond to changing queue conditions at Thapathali T1.
 
 At each 15-second step, the state representation module reads lane-level values through SUMO's TraCI interface. PCU-weighted vehicle loads are computed for the 7 origin lanes and 5 outgoing lanes so that different vehicle classes do not count equally. Maximum waiting time is also taken from each of the 6 stopline lanes because a queue with long waiting vehicles should not be treated the same as a newly formed queue. Finally, the active signal phase is encoded as a 3-dimensional one-hot vector. These values form a 21-dimensional state vector for the agent.
 
 The DQN uses two neural networks with the same structure. The online Q-network receives the 21-dimensional state and passes it through three fully connected hidden layers of 128, 64, and 32 neurons using ReLU activation. Its output contains two Q-values, one for STAY and one for NEXT. The target network is updated less frequently by copying the online network weights, which makes the learning target more stable during training.
 
-A replay buffer stores up to 10,000 past experience tuples, each consisting of the observed state, selected action, received reward, resulting next state, and episode termination flag. During each training step, a random mini-batch of 64 transitions is sampled from this buffer to compute the Q-learning update, breaking the temporal correlations between consecutive experiences and preventing the network from overfitting to recent transitions. This experience replay mechanism significantly improves the stability and sample efficiency of the learning process across the full training run of 300 episodes.
+A replay buffer stores up to 10,000 past experience tuples: state, action, reward, next state, and the episode termination flag. During training, a random mini-batch of 64 transitions is sampled for the Q-learning update. This breaks the direct ordering of consecutive simulation steps, which is important because traffic states at adjacent seconds are highly correlated. Without replay, the network would mostly learn from the most recent traffic pattern instead of from the wider range of situations seen across the 300 training episodes.
 
-An $\epsilon$-greedy exploration strategy governs action selection throughout training. In early episodes the agent selects actions randomly with high probability, broadly exploring the state space and populating the replay buffer with diverse experiences. As training progresses $\epsilon$ decays multiplicatively after each episode, gradually shifting the agent towards exploiting its learned Q-values for action selection. By the final episodes the agent operates almost entirely on its learned policy, with only a small residual probability of random exploration retained to avoid becoming trapped in suboptimal behaviours.
+An $\epsilon$-greedy strategy controls exploration. In the early episodes, the agent selects random actions often enough to populate the replay buffer with different queue and phase conditions. As $\epsilon$ decays after each episode, the controller gradually shifts toward the actions suggested by its learned Q-values. A small amount of exploration remains near the end of training so that the policy does not become fixed too early around a weak phase-selection pattern.
 
 The action space consists of 2 discrete actions - STAY and NEXT - applied over a cyclic sequence of 3 predefined signal phases. At each 15-second decision interval the agent either maintains the current active phase to continue serving the same traffic direction or advances to the next phase in the cycle to serve a different approach. Each phase transition includes a 3-second yellow interval to preserve realistic signal behaviour in the simulation.
 
@@ -148,7 +148,7 @@ The available data was represented using \gls{pcu} \gls{od} values and vehicle c
 
 \subsection{OD Data Allocation}
 \label{subsec:od_allocation}
-The vehicle allocation system is implemented using a Python script, leveraging libraries like \texttt{pandas}, \texttt{numpy}, and \texttt{matplotlib} for data manipulation and analysis. The following summarizes the key components of the implementation.
+Vehicle allocation was handled with a Python script using \texttt{pandas}, \texttt{numpy}, and \texttt{matplotlib}. The script was needed because the available traffic data did not directly provide a complete SUMO route file; vehicle counts had to be distributed across OD pairs and vehicle classes before simulation.
 
 The primary input data consists of:
 \begin{itemize}
@@ -187,15 +187,15 @@ The final allocated vehicle counts are saved to Excel files, including:
 \section{Environment Setup for Traffic Simulation}
 \label{sec:env_setup}
 
-The first step in the environment setup for traffic simulation using \gls{sumo} was to use the NETEDIT tool to create a road network that accurately represents the Thapathali intersection. This tool allows for the design of road networks, including multiple lanes, junctions, and traffic signals. The geometry of the intersection and road structure was designed in NETEDIT and saved as the \texttt{map.net.xml} file. This file contains the road network's topography, including nodes (junctions), edges (roads), and their connections. It also defines traffic signals at each intersection, which are crucial for simulating realistic traffic flow.
+The SUMO environment was prepared by editing the Thapathali road network in NETEDIT. The network was saved as \texttt{map.net.xml}, which stores the junctions, road edges, lane connections, and traffic-signal logic used by the simulator. This step matters because small errors in lane connections or phase definitions can produce unrealistic queues before the DQN agent is even introduced.
 
-Once the network structure was defined, vehicle movement was modeled using the \texttt{routes.rou.xml} file. This file specifies the routes that vehicles will take through the network and includes information such as departure times, vehicle types, and flow. The vehicle flow is generated to ensure that vehicles enter the network at regular intervals, with a preference for the least congested lane, thus simulating realistic driving behavior.
+After the network was prepared, vehicle movement was defined through \texttt{routes.rou.xml}. This file specifies each route, departure pattern, vehicle type, and flow. The generated flows allow vehicles to enter the network across the simulation period rather than appearing as a single batch, which gives the controller a changing traffic state to respond to.
 
 The \texttt{vtypes.xml} file defines various vehicle types used in the simulation, each with specific attributes such as length, maximum speed, acceleration, and deceleration. These characteristics are essential for accurately simulating vehicle behavior across different classes.
 
 The \texttt{flows.xml} file captures vehicle flow data and traffic signal phases. This file defines how many vehicles pass through each edge of the network in specific time intervals and the corresponding traffic signal phases.
 
-To interact with the simulation in real-time, the \gls{traci} interface is used. This allows external scripts to control the simulation, modifying vehicle flows and traffic signal phases dynamically. A Python script adjusts the signal phases based on real-time data, such as vehicle counts and congestion levels.
+The Python controller interacts with SUMO through \gls{traci}. Through this interface, the script reads lane-level vehicle counts and waiting times, applies signal actions, and records the metrics used for evaluation. This is the link that turns the SUMO network from a passive simulation into an environment for reinforcement learning.
 
 \begin{figure}[H]
     \centering
@@ -232,7 +232,7 @@ The agent maintains the current active phase for another 15 seconds, allowing co
 \end{itemize}
 
 \subsection{Reward Function}
-\noindent A reward function based on Max-Pressure Theory was used. Pressure was calculated as the difference between incoming and outgoing vehicle PCU counts:
+\noindent The reward function was based on Max-Pressure theory. Pressure was calculated from the difference between stopline PCU accumulation and outgoing PCU discharge:
 
 \begin{equation}
 R = -\left(\sum_{l \in L_{\text{stop}}} \text{PCU}(l) - \sum_{l \in L_{\text{out}}} \text{PCU}(l)\right) - \lambda \sum_{l \in L_{\text{stop}}} \sum_{v \in l} \text{PCU}(v) \cdot w^{acc}(v)
