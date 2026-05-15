@@ -2,30 +2,86 @@
 \label{chap:literature_review}
 
 % Overview of the intersection congestion problem and the baseline study for Thapathali
-\noindent The literature for this project was reviewed with two questions in mind. First, what conventional signal-control methods provide a reasonable baseline for an isolated intersection? Second, what parts of reinforcement learning are actually useful for a single-junction DQN implementation? This matters because the project should not simply add a neural network to a traffic simulation. It also needs a defensible baseline, a state representation that captures the Thapathali traffic condition, and a reward function that matches the evaluation metrics. The local Thapathali case study provides the field context by reporting observed peak-hour volumes, delay-related indicators, queue behaviour, and level of service for the existing operation \cite{maharjan2023performance}.
+\noindent The literature review was used to answer two practical questions for
+this project. The first was which conventional signal-control method
+should be used as a baseline for Thapathali. The second was which parts
+of reinforcement learning are useful for a single-junction DQN
+implementation. This framing matters because the project should not
+simply attach a neural network to a traffic simulation. It needs a
+baseline, a state representation that describes the local traffic
+condition, and a reward function that matches the metrics used later in
+evaluation.
+
+The local Thapathali case study provides the field context for that
+decision. It reports observed peak-hour volumes, delay-related
+indicators, queue behaviour, and level of service for the existing
+operation \cite{maharjan2023performance}.
 
 % Fixed-time, actuated, and rule-based approaches to intersection signal timing
 \section{Conventional Traffic Signal Control Methods}
 \label{sec:conventional_methods}
-\noindent For an isolated junction, traditional control usually begins with a phase sequence, cycle length, and green split. Webster-type timing is a common example: it uses traffic volume and simplifying assumptions to produce a fixed-time plan for one intersection \cite{wei2020survey}. Such methods are attractive because the result is easy to inspect and implement, which is why fixed-time control remains a useful baseline in this report. The weakness is that a fixed plan assumes the demand pattern used during timing design will remain representative during operation. At a place like Thapathali, where approach demand changes across the day, that assumption is often too strong.
+\noindent For an isolated junction, traditional control usually starts with a
+phase sequence, cycle length, and green split. Webster-type timing is a
+common example. It uses traffic volume and simplifying assumptions to
+produce a fixed-time plan for one intersection \cite{wei2020survey}.
+These methods are still useful because they are easy to inspect and
+implement. That is why fixed-time control is used as the baseline in this
+report.
 
-Actuated and rule-based controllers improve on fixed timing by using detector inputs and predefined switching rules \cite{wei2020survey}. Selection-based adaptive control goes one step further by choosing among prepared timing plans, while optimization-based adaptive control explicitly optimizes an objective under a simplified traffic-flow model \cite{wei2020survey}. These methods are still valuable because they are interpretable and do not require long training runs. However, they also need calibration and may fail when the real traffic state does not match the simplified model or the precomputed timing plan.
+The weakness is the assumption behind the timing plan. A fixed plan
+expects the design demand to remain representative during operation. At
+Thapathali, where approach demand changes across the day, that assumption
+is often too strong.
 
-Max-pressure control is especially relevant to this project because it uses queue imbalance between upstream and downstream links to decide which phase should receive service \cite{wei2020survey}. It is stronger than a simple fixed-time baseline because it reacts to the observed queue state, and it has known throughput-related properties under specific assumptions. Its limitation is that the decision remains myopic: the controller reacts to the current pressure but does not learn from repeated interaction. This is the reason max-pressure ideas are used in this project as reward guidance rather than as the whole controller.
+Actuated and rule-based controllers improve on fixed timing by using
+detector inputs and predefined switching rules \cite{wei2020survey}.
+Selection-based adaptive control chooses among prepared timing plans.
+Optimization-based adaptive control optimizes an objective under a
+simplified traffic-flow model \cite{wei2020survey}. These methods remain
+valuable because they are interpretable and do not require long training
+runs. Their limitation is calibration: if the real traffic state does not
+match the simplified model or prepared plan, performance can drop.
+
+Max-pressure control is especially relevant here because it uses queue
+imbalance between upstream and downstream links to decide which phase
+should receive service \cite{wei2020survey}. It is stronger than a simple
+fixed-time baseline because it reacts to the observed queue state. Its
+limitation is that the decision is still myopic: the controller reacts to
+current pressure but does not learn a policy from repeated interaction.
+For that reason, this project uses max-pressure as reward guidance rather
+than as the complete controller.
 
 % Framing traffic signal control as a sequential decision-making problem using reinforcement learning
 \section{RL for Traffic Signal Control}
 \label{sec:rl_traffic_control}
 \noindent \gls{rl} changes the framing of traffic control from one-time timing calculation to sequential decision-making. The agent observes the traffic state, takes an action such as holding or changing the phase, and receives a reward that reflects the quality of the decision. This is useful because the correct action is not known in advance for every possible queue pattern. Instead of manually labelling the best signal decision for thousands of situations, the agent can learn through repeated simulation episodes \cite{wei2020survey}.
 
-For a single-intersection project, the key design choices are easy to list but difficult to tune in practice: the observed state, the allowed actions, and the reward. Prior work commonly uses lane-level counts, queue lengths, waiting time, and the current signal phase as state information, while rewards are often based on delay, queue length, pressure, or throughput \cite{wei2019colight,wei2020survey}. This directly shaped the present design. The state vector combines PCU-weighted incoming loads, stopline waiting times, outgoing traffic load, and active phase information because each part describes a different control concern at Thapathali.
+For a single-intersection project, the key design choices are the
+observed state, allowed actions, and reward. Prior work commonly uses
+lane-level counts, queue lengths, waiting time, and current signal phase
+as state information. Rewards are usually based on delay, queue length,
+pressure, or throughput \cite{wei2019colight,wei2020survey}. This shaped
+the present design. PCU-weighted incoming loads, stopline waiting times,
+outgoing traffic load, and active phase information were included because
+each one describes a different control concern at Thapathali.
 
 % Application of deep neural networks to approximate Q-values for traffic control decisions
 \section{DRL and Value-Based Control with DQN}
 \label{sec:drl_dqn_control}
 \noindent \gls{drl} extends \gls{rl} by using neural networks to approximate value functions or policies, allowing the controller to learn from richer traffic states. The \gls{dqn} method is a practical value-based choice when the action space is discrete, because it estimates the value of each possible action and can be trained with experience replay to reduce instability \cite{wei2019presslight}. This fits the present project because the action space is intentionally limited to STAY and NEXT.
 
-A recurring issue in \gls{drl} traffic-signal studies is that the algorithm alone does not guarantee good control. Poor state choices can hide important traffic conditions, and poorly shaped rewards can push the agent toward behaviour that improves one metric while damaging another. PressLight addresses this problem by linking \gls{drl} design with max-pressure theory: the reward is shaped around pressure, and the state is selected to support that objective \cite{wei2019presslight}. This is the main reason the present project uses a Max-Pressure based reward with an added waiting-time penalty, rather than a purely delay-based or purely throughput-based reward.
+A recurring issue in \gls{drl} traffic-signal studies is that the
+algorithm alone does not guarantee good control. Poor state choices can
+hide important traffic conditions. Poorly shaped rewards can also push
+the agent toward behaviour that improves one metric while damaging
+another.
+
+PressLight addresses this problem by linking \gls{drl} design with
+max-pressure theory: the reward is shaped around pressure, and the state
+is selected to support that objective \cite{wei2019presslight}. This is
+the reason the present project uses a Max-Pressure based reward with an
+added waiting-time penalty rather than a purely delay-based or
+throughput-only reward.
 
 Evaluation practice in \gls{drl} traffic control also influenced this report. Learned policies are normally compared against non-learning baselines such as fixed-time plans or transportation-inspired controllers, and the comparison is made using operational metrics such as travel time, delay, queue length, and throughput \cite{wei2019presslight,wei2020survey}. For this project, that means the DQN result is only meaningful if it is tested on the same Thapathali demand as the fixed signal plan and judged by measurable traffic indicators.
 

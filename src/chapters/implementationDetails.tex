@@ -209,14 +209,25 @@ This file specifies the characteristics of different vehicle types used in the s
 
 \subsection{\texttt{flows.xml}}
 \label{subsec:flows_xml}
-In our simulation, the \texttt{departLane="best"} parameter was employed to ensure that vehicles are assigned to the most optimal lane when they enter the network. This helps to improve the overall efficiency of the traffic flow by minimizing congestion and ensuring that vehicles are distributed across available lanes in an optimal manner.
+The \texttt{departLane="best"} option was used so that SUMO assigns
+entering vehicles to a suitable available lane. This avoids forcing all
+vehicles into a single lane at entry and gives a more realistic starting
+distribution for each route.
 
-Additionally, a uniform vehicle generation pattern was applied, with vehicles entering the network in 15-minute intervals. This ensures that traffic flow is consistent and realistic, mirroring typical traffic patterns observed during peak hours while maintaining a balanced vehicle entry rate across the simulation period.
+Vehicle generation was organised in 15-minute intervals to match the
+format of the prepared count data. This keeps the simulated demand tied
+to the observed data while still spreading arrivals across each interval.
 
 \subsection{\texttt{simulation.sumocfg} (SUMO Configuration File)}
 \label{subsec:sumocfg}
-The \gls{sumo} configuration file defines the simulation parameters, such as which files to use (network, route, vtype, flows, and add), the simulation duration, and various settings for the simulation itself.
-The lateral-resolution parameter in the \gls{sumo} configuration file (\texttt{.sumocfg}) is used to define the resolution at which the lanes are subdivided during the simulation. It specifies the width of the lane in terms of the vehicle's lateral position. This value is particularly important for controlling the precision of lane-changing behavior, vehicle positioning, and simulation accuracy in \gls{sumo}.
+The \gls{sumo} configuration file links the network, route, vehicle-type,
+flow, and additional files used in the simulation. It also sets the
+simulation duration and runtime options.
+
+The lateral-resolution parameter controls how finely each lane is divided
+for lateral vehicle positioning. This matters for lane-changing behaviour
+and vehicle placement, especially because the Thapathali network includes
+several closely spaced turning movements.
 
 To ensure high accuracy in vehicle positioning and lane-changing behavior, a lateral resolution of 0.2 meters was used in the \gls{sumo} simulation.
 
@@ -224,7 +235,18 @@ To ensure high accuracy in vehicle positioning and lane-changing behavior, a lat
 \section{Environment Wrapper Implementation}
 \label{sec:env_wrapper}
 
-The SumoEnvironment class acts as the boundary between SUMO and the reinforcement learning code. The reset() method starts a new episode and clears the internal counters. The step(action) method applies the selected signal decision for a 15-second window, collects rewards during that window, and returns the next state with episode metrics. The \_get\_state() method extracts the 21-dimensional state vector from lane loads, stopline waiting times, outgoing PCU values, and the active phase. The \_calculate\_reward() method compares stopline PCU against outgoing PCU discharge and then adds the PCU-weighted waiting-time penalty. Signal changes are finally applied through TraCI, including the yellow transition between phases.
+The SumoEnvironment class is the boundary between SUMO and the learning
+code. Its main methods are:
+
+\begin{itemize}
+    \item reset() starts a new episode and clears internal counters.
+    \item step(action) applies STAY or NEXT for one 15-second decision window.
+    \item \_get\_state() builds the 21-dimensional state vector.
+    \item \_calculate\_reward() computes pressure and waiting-time penalty.
+\end{itemize}
+
+Signal changes are applied through TraCI, including the yellow transition
+between phases.
 
 The state representation has 21 dimensions. Seven values describe origin-lane PCU load, six values record maximum waiting time at stopline lanes, five values represent outgoing-lane PCU load, and three one-hot values indicate the active phase. The action space remains deliberately small: STAY or NEXT over the three-phase cycle.
 
@@ -317,11 +339,23 @@ The traffic signal system at the Thapathali Intersection is organized into three
 
 \textbf{Traffic Signal Control Strategies}
 
-In the fixed-time control approach, the signal operates on a constant cycle length of 60 seconds, where the phases P0, P1, and P2 are activated sequentially with predefined time allocations. This method does not consider real-time traffic conditions and follows a repetitive cycle regardless of traffic demand, making it simple to implement but less efficient under varying traffic conditions.
+In the fixed-time baseline, the signal follows a 60-second cycle. Phases
+P0, P1, and P2 are activated in sequence with predefined allocations.
+This is simple to implement and useful as a baseline, but it does not
+look at the queue state before deciding whether to hold or change phase.
 
-In contrast, the \gls{dqn}-based control approach introduces adaptive signal operation. In this method, the system evaluates traffic conditions at regular intervals of 15 seconds and decides whether to maintain the current phase or switch to another phase based on the observed traffic state. This allows the signal timing to adjust dynamically according to traffic demand, helping to reduce vehicle delays, queue lengths, and overall congestion at the intersection.
+The DQN controller uses the same phase order but changes how long a phase
+is held. Every 15 seconds, it reads the current state and chooses STAY or
+NEXT. This keeps the action safe and inspectable while still allowing the
+controller to react when demand shifts between approaches.
 
-To simulate downstream backspill, a random-timer traffic signal with durations of 30, 45, or 60 seconds is placed at the end of each outgoing route to restrict vehicle movement. The signal enforces a 3-second yellow phase whenever the movement changes from green to red, which is deducted from the total green time. Meanwhile, the main (or Maternity) road operates on a fixed-timer signal with a 45-second green and 15-second red in a cyclic pattern in both fixed-timer and \gls{dqn}-based modes.
+Downstream backspill was approximated by placing random-timer signals at
+the end of outgoing routes. These timers used 30, 45, or 60-second green
+durations and included a 3-second yellow transition when movement changed
+from green to red. This is not a full downstream network model, but it
+prevents outgoing links from behaving as if they had unlimited capacity.
+The Maternity road signal was kept fixed at 45 seconds green and 15
+seconds red in both controller modes.
 
 % Neural network architecture and learning mechanics of the DQN agent
 \section{DQN Agent Implementation}
@@ -329,23 +363,49 @@ To simulate downstream backspill, a random-timer traffic signal with durations o
 
 The neural network processed 21-dimensional state inputs through three hidden layers: 128 neurons in the first layer, 64 neurons in the second layer, and 32 neurons in the third layer, all using ReLU activation. The output layer produced 2 Q-values, one for each possible action - STAY and NEXT.
 
-Two networks were maintained: a Q-network for action selection that updated continuously during training, and a target network for stable learning targets that updated every 10 episodes by copying the Q-network weights directly. Experience replay stored up to 10,000 transitions in a circular buffer and randomly sampled mini-batches of 64 transitions for each training step, breaking temporal correlations between consecutive experiences and improving learning stability.
+Two networks were maintained. The Q-network selected actions and was
+updated during training. The target network provided more stable target
+values and copied the Q-network weights every 10 episodes. Experience
+replay stored up to 10,000 transitions and sampled mini-batches of 64,
+so each update was not based only on the most recent few simulation
+steps.
 
-$\epsilon$-greedy exploration started with fully random actions ($\epsilon = 1.0$) and gradually shifted to exploiting learned Q-values as $\epsilon$ decayed by a factor of 0.985 per episode, reaching a minimum of $\epsilon = 0.01$ by approximately episode 300. Q-learning updates computed current Q-values from the Q-network and target Q-values using the Bellman equation - rewards plus discounted maximum future Q-values from the target network with discount factor $\gamma = 0.95$. Mean squared error between the current and target Q-values was minimised during training using the Adam optimiser with a learning rate of 0.001.
+$\epsilon$-greedy exploration began with random actions
+($\epsilon = 1.0$). After each episode, $\epsilon$ was multiplied by
+0.985 until it reached 0.01 near the end of training. Current Q-values
+came from the Q-network, while target values used the Bellman update with
+discount factor $\gamma = 0.95$. The difference between the current and
+target Q-values was minimised using Adam with a learning rate of 0.001.
 
 % Episode-level training loop, checkpoint saving, and epsilon decay schedule
 \section{Training Pipeline Implementation}
 \label{sec:training_pipeline}
 
-Training ran for 300 episodes. Each episode followed this sequence: reset simulation, observe initial state, select action using $\epsilon$-greedy policy, apply 3-second yellow phase when switching to next phase, execute 15-second green phase, collect reward averaged over the action duration, observe next state, store transition experience in replay buffer, train on random mini-batch of 64 if buffer contained sufficient samples, and update state for the next decision step.
+Training ran for 300 episodes. In each episode, the simulation was reset,
+the initial state was read, and the agent selected actions using the
+$\epsilon$-greedy policy. When the action changed the phase, a 3-second
+yellow interval was applied before the next 15-second green period. The
+environment then returned the averaged reward, next state, and episode
+metrics. Once the replay buffer contained enough samples, the agent
+trained on random mini-batches of 64 transitions.
 
-Between episodes, $\epsilon$ decayed by multiplying by 0.985, gradually reducing random exploration in favour of learned policy exploitation. Every 10 episodes the target network updated its weights by copying directly from the Q-network, stabilising the learning targets. Model checkpoints were saved every 5 episodes to allow recovery and evaluation at intermediate training stages. Outputs included periodic checkpoints, a final trained model saved upon completion of all 300 episodes, and training visualisations showing reward, loss, average waiting time, throughput, and epsilon decay across episodes.
+Between episodes, $\epsilon$ decayed by 0.985. The target network was
+updated every 10 episodes, and checkpoints were saved every 5 episodes.
+The outputs from training were the saved model, intermediate checkpoints,
+and plots for reward, loss, average waiting time, throughput, and epsilon
+decay.
 
 % Centralized configuration file managing hyperparameters, file paths, and phase definitions
 \section{Configuration Management}
 \label{sec:config_management}
 
-A central configuration file managed all parameters: training settings (episodes = 300, learning rate = 0.001, batch size = 64), DQN hyperparameters ($\epsilon$ decay = 0.985, discount factor $\gamma$ = 0.95, replay buffer size = 10,000, target network update frequency = 10 episodes), traffic light identifiers and phase definitions for P1, P2 and P3, lane definitions for origin, stopline and outgoing lanes, PCU values for each vehicle type present at Thapathali T1, reward weighting factor $\lambda$ = 0.0004, SUMO simulation file paths, and action durations (yellow transition: 3 seconds, green phase: 15 seconds per decision step). Centralising all parameters in a single configuration file ensured consistency across training, evaluation and comparison scripts and allowed hyperparameter adjustments without modifying the core environment or agent code.
+The configuration file kept the experiment parameters in one place:
+episodes, learning rate, batch size, $\epsilon$ decay, discount factor,
+replay buffer size, target-network update frequency, signal identifiers,
+lane lists, PCU values, reward weight $\lambda$, SUMO paths, and action
+durations. Keeping these values outside the main environment and agent
+classes made the training, evaluation, and fixed-baseline scripts use the
+same settings.
 
 
 \section{Metric Calculation}
@@ -361,4 +421,6 @@ Throughput per Wait Second was calculated as a composite efficiency metric by di
 
 $$\text{Throughput per Wait Second} = \frac{\text{Total Throughput (vehicles)}}{\text{Average Waiting Time (seconds)}}$$
 
-A higher value indicates a more efficient intersection operation, with more vehicles cleared per unit of delay experienced, allowing direct comparison between the DQN agent and the fixed timer baseline across different traffic conditions.
+A higher value means that more vehicles were cleared for each second of
+average delay. This made it useful for comparing the DQN policy with the
+fixed-timer baseline under the same demand.

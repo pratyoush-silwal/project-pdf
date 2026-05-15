@@ -7,7 +7,20 @@
 
 The system uses a Deep Q-Network controller with SUMO as the traffic environment. During design, the control action was kept close to what a traffic signal can realistically do: at a fixed decision interval, the controller can either hold the current phase or move to the next phase in the cycle. This avoids an unnecessarily large action space while still allowing the agent to respond to changing queue conditions at Thapathali T1.
 
-At each 15-second step, the state representation module reads lane-level values through SUMO's TraCI interface. PCU-weighted vehicle loads are computed for the 7 origin lanes and 5 outgoing lanes so that different vehicle classes do not count equally. Maximum waiting time is also taken from each of the 6 stopline lanes because a queue with long waiting vehicles should not be treated the same as a newly formed queue. Finally, the active signal phase is encoded as a 3-dimensional one-hot vector. These values form a 21-dimensional state vector for the agent.
+At each 15-second step, the state representation module reads lane-level
+values through SUMO's TraCI interface. The 21-dimensional state vector
+contains four parts:
+
+\begin{itemize}
+    \item PCU-weighted vehicle load on 7 origin lanes,
+    \item maximum waiting time on 6 stopline lanes,
+    \item PCU-weighted vehicle load on 5 outgoing lanes,
+    \item a 3-dimensional one-hot encoding of the active signal phase.
+\end{itemize}
+
+This combination was used because vehicle count alone would not separate
+light vehicles from heavier vehicles, and queue length alone would not
+show whether downstream discharge was blocked.
 
 The DQN uses two neural networks with the same structure. The online Q-network receives the 21-dimensional state and passes it through three fully connected hidden layers of 128, 64, and 32 neurons using ReLU activation. Its output contains two Q-values, one for STAY and one for NEXT. The target network is updated less frequently by copying the online network weights, which makes the learning target more stable during training.
 
@@ -28,23 +41,17 @@ The action space consists of 2 discrete actions - STAY and NEXT - applied over a
 \section{Use Case Diagram}
 \label{sec:use_case_diagram}
 
-Figure \ref{fig:use_case_diagram} presents the use case diagram for the Thapathali DQN Traffic
-Signal Control System. The system involves four actors: the Traffic
-Engineer, Evaluation Analyst, SUMO Simulator, and DQN Agent. The Traffic
-Engineer initiates the system by configuring the simulation, loading the
-trained model, and starting the simulation. The Evaluation Analyst is
-responsible for generating performance metrics and triggering the
-comparison between the DQN agent and the fixed timer baseline. The SUMO
-Simulator acts as the external simulation environment supporting both
-training and evaluation. The DQN Agent autonomously observes traffic
-state, selects signal actions, stores experiences, applies signal
-phases, and calculates rewards during training. The Train DQN Model use
-case includes five mandatory sub-processes: observe traffic state,
-select signal action, apply signal phase, store experience, and
-calculate reward, all executed at every decision step. Update Standalone
-Signals extends the training process under specific traffic conditions,
-while Compare DQN vs Fixed Timer extends from Generate Performance
-Metrics and triggers the Run Test Scenario use case for evaluation.
+Figure \ref{fig:use_case_diagram} shows how the simulation workflow is
+split between four actors: the Traffic Engineer, Evaluation Analyst, SUMO
+Simulator, and DQN Agent. The Traffic Engineer prepares the scenario,
+loads the trained model, and starts the simulation. The DQN Agent then
+observes the state, selects STAY or NEXT, applies the signal phase, and
+stores the transition for training.
+
+The Evaluation Analyst role is separated because evaluation must run the
+DQN policy and the fixed timer on the same demand. The SUMO Simulator
+acts as the environment for both training and testing, so the controller
+comparison is not affected by changing the traffic input.
 
 \begin{figure}[H]
     \centering
@@ -56,23 +63,18 @@ Metrics and triggers the Run Test Scenario use case for evaluation.
 \section{Class Diagram}
 \label{sec:class_diagram}
 
-Figure \ref{fig:class_diagram} presents the class diagram illustrating the structural
-relationships between the five core classes of the system. The TrainDQN
-class serves as the entry point, creating the SumoEnvironment and using
-the DQNAgent to manage the training loop. The SumoEnvironment class
-encapsulates all simulation interaction through SUMO\textquotesingle s
-TraCI interface, maintaining lane-level traffic data and exposing
-methods for state observation, reward calculation, phase control, and
-metric collection. The DQNAgent class manages the reinforcement learning
-logic, holding references to two DQNetwork instances -- the Q-network
-for action selection and the target network for stable learning targets
--- and a ReplayBuffer for experience storage. The DQNetwork class
-implements the neural network with three fully connected hidden layers.
-The config class acts as a shared configuration module, read by both
-SumoEnvironment and DQNAgent to maintain consistent hyperparameters and
-simulation settings throughout the system. The FixedTimerController
-class operates independently and compares against SumoEnvironment during
-evaluation.
+Figure \ref{fig:class_diagram} shows the main code structure. TrainDQN is
+the entry point for training. It creates the SumoEnvironment and passes
+control to the DQNAgent. SumoEnvironment handles TraCI communication,
+including state extraction, reward calculation, phase control, and metric
+collection.
+
+DQNAgent contains the learning logic. It uses two DQNetwork instances:
+one online network for action selection and one target network for stable
+targets. ReplayBuffer stores transitions for experience replay. The
+configuration class keeps lane names, phase definitions, file paths, and
+hyperparameters in one place. FixedTimerController is kept separate so it
+can be used as a baseline during evaluation.
 
 \begin{figure}[H]
     \centering
@@ -84,25 +86,20 @@ evaluation.
 \section{Sequence Diagram}
 \label{sec:sequence_diagram}
 
-Figure \ref{fig:sequence_diagram} presents the sequence diagram illustrating the end-to-end
-flow of the system from initialisation through training to final
-evaluation. The traffic engineer triggers the process by calling
-train(), which initialises the DQNAgent with its neural networks and
-replay buffer and the SumoEnvironment, which loads the network and flow
-files into SUMO. During the 300-episode training loop, each episode
-begins with a reset and proceeds through repeated decision steps where
-the agent observes the state, selects an action, and applies the signal
-phase for 15 seconds of green time. When the agent selects NEXT, a
-3-second yellow transition is executed before switching to the next
-phase, ensuring safe and realistic signal operation. The agent then
-receives the reward, stores the experience, and performs a training
-step. After each episode epsilon decays, the target network synchronises
-every 10 episodes, and checkpoints are saved every 5 episodes. Upon
-completion the final model is saved and training plots are generated.
-During evaluation the Evaluation Analyst runs the FixedTimerController
-on the same test scenario to collect baseline metrics, then runs the DQN
-agent in test mode using the saved model to collect DQN metrics, and
-finally compares both results to generate the performance report.
+Figure \ref{fig:sequence_diagram} gives the order of operations from
+training to evaluation. The process begins with train(), which creates
+the DQNAgent and SumoEnvironment. SUMO then loads the road network and
+vehicle-flow files.
+
+Each training episode starts with a reset. At every decision step, the
+agent observes the state, chooses STAY or NEXT, and applies the phase for
+15 seconds. If NEXT is selected, a 3-second yellow transition is inserted
+before the next phase. The environment returns the reward and next state,
+and the agent stores the transition before training on replay samples.
+
+Evaluation uses the same test scenario twice: first with
+FixedTimerController and then with the saved DQN model. The two metric
+sets are compared after both runs finish.
 
 \begin{figure}[H]
     \centering
@@ -119,7 +116,16 @@ finally compares both results to generate the performance report.
 \label{subsec:data_collection}
 Primary traffic-flow data for the network model was taken from \textit{A Case Study of Thapathali Intersection} by Lav Maharjan \cite{maharjan2023performance}. The source study provides five days of observations, covering three weekdays and two weekend days from 6:00 AM to 10:15 PM. This was sufficient for the scope of the project because it includes both peak periods and lower-demand transition hours, although it does not cover unusual events such as road closures, festivals, or accidents.
 
-The available data was represented using \gls{pcu} \gls{od} values and vehicle counts. The \gls{pcu} \gls{od} data was available for one morning peak interval and one evening peak interval, while the vehicle counts were recorded across smaller time intervals. Because the OD proportions were not available for every interval, the implementation interpolates proportions between the observed AM and PM patterns and then allocates vehicle counts by class. This step is an approximation, but it keeps the generated demand tied to the measured Thapathali data instead of using arbitrary synthetic flows.
+The available data was represented using \gls{pcu} \gls{od} values and
+vehicle counts. The \gls{pcu} \gls{od} data was available for one morning
+peak interval and one evening peak interval. Vehicle counts, however,
+were available across smaller time intervals.
+
+Because OD proportions were not available for every interval, the
+implementation interpolates between the observed AM and PM patterns and
+then allocates vehicle counts by class. This is an approximation, but it
+keeps the generated demand tied to measured Thapathali data rather than
+using arbitrary synthetic flows.
 
 \subsection{Data Representation}
 \label{subsec:data_representation}
@@ -252,66 +258,55 @@ R = -\left(\sum_{l \in L_{\text{stop}}} \text{PCU}(l) - \sum_{l \in L_{\text{out
 \section{Design Justification}
 \label{sec:design_justification}
 
-Several reward formulations were considered before adopting the
-Max-Pressure based reward. A pure delay-based reward penalising total
-accumulated waiting time across all vehicles was ruled out because
-accumulated waiting time grows unboundedly within an episode, causing
-Q-value targets to grow without bound and leading to loss divergence
-during training. A throughput-only reward rewarding the agent purely for
-vehicles cleared was also considered but rejected because outgoing lane
-flow at Thapathali is heavily influenced by road width and geometry
-rather than signal decisions alone, meaning the agent would learn to
-favour wider outgoing lanes regardless of which approach actually had
-the heaviest queue.
+The reward design was revised several times during implementation. A pure
+delay penalty was the first simple option, but accumulated waiting time
+keeps increasing inside an episode. In early tests, that made the target
+values too large and the loss unstable.
 
-The adopted formulation is grounded in Max-Pressure theory, which has
-theoretical throughput optimality properties under certain demand
-conditions and has been validated in prior DRL traffic signal control
-literature. The first term computes the pressure difference between
-stopline PCU accumulation and outgoing PCU discharge - directly
-measuring whether the agent\textquotesingle s current phase choice is
-clearing vehicles efficiently. The second term adds a PCU-weighted
-accumulated waiting time penalty scaled by $\lambda =
-0.0004$, discouraging the agent from ignoring any single approach for
-extended periods. The $\lambda$ value was calibrated to
-keep the wait penalty secondary to the throughput objective, preventing
-the agent from sacrificing overall flow in favour of minimising wait
-time on a single approach.
+A throughput-only reward was also considered, but it was not suitable for
+Thapathali. Some outgoing links clear vehicles more easily because of
+their width and geometry. A reward based only on discharge could
+therefore favour an easier outgoing path rather than the approach with
+the more urgent queue.
+
+The adopted reward therefore uses Max-Pressure as the main signal and
+adds a smaller waiting-time penalty. The pressure term compares stopline
+PCU with outgoing PCU, which matches the actual control question: is the
+selected phase helping vehicles leave the intersection? The waiting-time
+term, scaled by $\lambda = 0.0004$, was added to prevent the controller
+from repeatedly ignoring a low-volume approach. In this formulation,
+fairness acts as a correction to the pressure objective, not as a
+replacement for it.
 
 \subsection{Impact on Learning}
 \label{subsec:impact_on_learning}
 
-The reward function directly shapes the Q-value targets the agent learns
-from at every training step. The pressure term
-$-(\sum_{l \in L_{stop}} \text{PCU}(l) - \sum_{l \in L_{out}} \text{PCU}(l))$
-provides an instantaneous signal that reflects the current state of the
-intersection - when the agent selects the correct phase, outgoing PCU
-increases and stopline PCU decreases, producing a less negative reward
-that reinforces the action. When the agent holds the wrong phase,
-stopline PCU accumulates and outgoing PCU stays low, producing a more
-negative reward that discourages the action. This direct
-cause-and-effect relationship between phase selection and reward is
-essential for stable Q-value learning.
+The reward is used at every Q-learning update, so it had to be easy for
+the agent to interpret. When a phase clears vehicles, outgoing PCU rises
+and stopline PCU falls; the reward becomes less negative. When the
+controller keeps an unhelpful phase, the opposite happens and the reward
+worsens. This gives the network a direct signal linking the phase choice
+to the observed traffic response.
 
-The accumulated wait penalty $\lambda \sum_{v} \text{PCU}(v) \cdot w^{acc}(v)$
-complements the pressure term by introducing a fairness objective-the
-agent is penalised for vehicles that have been waiting for extended
-periods regardless of which lane they occupy. This prevents the agent
-from learning a degenerate policy that maximises throughput on one
-high-flow approach while consistently starving lower-volume approaches
-of green time.
+The accumulated wait penalty handles a case that pressure alone can miss.
+If a small approach keeps waiting while the larger approaches dominate
+the pressure term, the penalty gradually makes that delay visible to the
+agent. This reduces the chance of learning a policy that looks efficient
+in aggregate but is unacceptable for one movement.
 
-Together the two terms ensure that the agent learns to balance both
-efficiency -clearing the maximum number of PCU per unit time - and
-equity - preventing excessive delay accumulation on any single approach.
-This dual objective aligns directly with the project\textquotesingle s
-performance metrics of average wait time reduction and throughput
-efficiency improvement, ensuring that what the agent optimises during
-training corresponds to what is measured during evaluation.
+Together, the two terms connect training with the evaluation metrics used
+later in the report. The pressure term is related to discharge and
+throughput efficiency, while the waiting-time term is related to delay.
+The reward is therefore not an arbitrary score; it represents the same
+trade-off measured in the results chapter.
 
 \subsection{Neural Network Architecture}
 
-The agent was implemented using a deep neural network with one input layer, three hidden layers of 128, 64, and 32 neurons respectively, and an output layer with two action values corresponding to STAY and NEXT. The input layer accepts the 21-dimensional state vector representing current intersection conditions. ReLU activation functions were applied after each hidden layer to introduce non-linearity. The output layer produces Q-values for each of the two possible actions, from which the agent selects the action with the highest estimated future reward.
+The agent uses a feed-forward neural network. The input layer accepts the
+21-dimensional state vector. Three hidden layers with 128, 64, and 32
+neurons use ReLU activation. The output layer produces two Q-values,
+corresponding to STAY and NEXT. During exploitation, the agent selects
+the action with the higher estimated value.
 
 Two identical networks were used: a Q-network for action selection and a target network to stabilise learning during training. The target network weights were updated every 10 episodes by copying the Q-network weights, preventing oscillations and divergence during the training process.
 \begin{figure}[H]
@@ -325,39 +320,91 @@ Two identical networks were used: a Q-network for action selection and a target 
 
 \section{Hyperparameter Selection and Sensitivity}
 
-The DQN agent's behaviour is governed by a set of hyperparameters whose values were selected based on a combination of established practice in the DRL traffic signal control literature and the specific operational constraints of the Thapathali intersection. Each variable is justified below in terms of its functional role and the rationale for its assigned value.
+The DQN agent depends on several hyperparameters. The values below were
+chosen from standard DQN practice and then checked against the practical
+limits of this simulation: 300 training episodes, a single intersection,
+and CPU-friendly training time.
 
 \subsection{State Dimensionality (21 dimensions)}
 
-The state vector encodes three categories of intersection information: PCU-weighted load on 7 origin lanes, maximum waiting time on 6 stopline lanes, PCU-weighted load on 5 outgoing lanes, and a 3-dimensional one-hot encoding of the active phase. Each component addresses a distinct informational need. The origin lane PCU values tell the agent where pressure is building; the stopline waiting times capture fairness - whether any single approach has been ignored for too long; the outgoing PCU values reflect whether the intersection is successfully discharging traffic downstream; and the phase encoding prevents the agent from selecting actions without knowing its current operating context. Omitting any of these components would structurally impair the agent's ability to make informed decisions. For instance, an agent without outgoing lane information cannot distinguish between a green phase that is successfully clearing traffic and one that is being blocked by downstream congestion.
+The 21-dimensional state vector was kept small enough to train reliably
+but large enough to describe the intersection. Origin-lane PCU values
+show where demand is building. Stopline waiting times show whether one
+approach has waited too long. Outgoing-lane PCU values indicate whether
+vehicles are actually discharging downstream. The phase encoding is also
+necessary; without it, the same queue pattern could mean different
+things depending on which phase is currently active.
 
 \subsection{Replay Buffer Capacity (10,000 transitions)}
 
-The replay buffer stores past experience tuples to break temporal correlations between consecutive training samples. A buffer that is too small would cause the agent to train predominantly on recent experiences, leading to overfitting to current traffic conditions and instability when demand patterns shift between hours. A buffer that is too large relative to the number of training steps would dilute recent experience with outdated transitions, slowing adaptation. At 10,000 transitions and a 15-second decision step, this buffer spans approximately 41 simulated hours of experience - sufficient to cover the full daily demand cycle multiple times across episodes while remaining computationally tractable. Increasing this to 50,000 would likely improve sample diversity but would require proportionally more training episodes to populate and exploit the buffer effectively.
+The replay buffer stores past transitions so that training batches are
+not made only from consecutive simulation steps. A very small buffer made
+the agent depend too much on recent traffic conditions. A much larger
+buffer would add diversity, but it would also take more episodes to fill
+and use properly. With 10,000 transitions and a 15-second decision step,
+the buffer covers roughly 41 simulated hours, which is enough to mix
+different demand periods without making training unnecessarily heavy.
 
 \subsection{Batch Size (64 transitions)}
 
-Mini-batch gradient updates use 64 randomly sampled transitions per training step, a value standard in DQN implementations. Smaller batches introduce higher gradient variance, potentially destabilising Q-value updates. Larger batches reduce variance but increase per-step computational cost and can cause the network to overfit to the current batch distribution before the buffer has been adequately repopulated. At 64, each update covers a representative cross-section of stored experiences without excessive computational overhead on CPU-based training.
+The batch size was set to 64 transitions. Smaller batches produced
+noisier updates, while larger batches increased the cost of each training
+step. A batch of 64 gave a useful mix of stored experiences while keeping
+the training loop practical on the available hardware.
 
 \subsection{Discount Factor \( \gamma = 0.95 \)}
 
-The discount factor controls how much the agent values future rewards relative to immediate ones. A value of 1.0 would make the agent treat all future rewards as equally important regardless of how far ahead they occur, which is unsuitable for traffic control where the causal link between a signal decision and its traffic outcome attenuates over time as other vehicles arrive and depart. A value near 0 would make the agent myopic, optimising only the immediate reward of each 15-second step without accounting for downstream queue effects. At \( \gamma = 0.95 \), a reward received five decision steps (75 seconds) ahead is discounted to approximately 77\% of its face value - a horizon long enough to capture the queue-clearing consequences of phase decisions while keeping the training objective stable. Reducing \( \gamma \) to 0.90 would likely cause the agent to be more reactive and less capable of holding a phase strategically to clear a building queue.
+The discount factor controls how far ahead the agent looks. A value close
+to zero would make the controller react only to the next 15-second step.
+A value of 1.0 would give too much weight to far-future rewards, where
+the effect of one signal decision is harder to isolate.
+
+At \( \gamma = 0.95 \), a reward five decision steps later, or 75 seconds
+ahead, still keeps about 77\% of its value. That horizon is long enough
+to capture a queue-clearing decision without making the learning target
+too diffuse.
 
 \subsection{Epsilon Start (\( \varepsilon = 1.0 \)), Minimum (\( \varepsilon_{\min} = 0.01 \)), and Decay (\( \varepsilon_{\text{decay}} = 0.985 \))}
 
-The epsilon-greedy strategy governs exploration versus exploitation. Starting at \( \varepsilon = 1.0 \) ensures the agent explores the state space broadly in early episodes rather than immediately exploiting the random initial Q-values of the untrained network, which would bias learning toward the first arbitrary policy encountered. The decay factor of 0.985 applied after each episode causes \( \varepsilon \) to reach approximately 0.18 by episode 100 and 0.01 by episode 300, providing a gradual transition from exploration to exploitation that aligns with the agent's growing ability to make informed decisions as training progresses. A faster decay (e.g., 0.97) would cause the agent to commit to exploitation prematurely, before Q-values have stabilised, risking convergence to a suboptimal policy. A slower decay (e.g., 0.995) would extend random exploration unnecessarily into late training, wasting episodes where the agent has already learned a reasonable policy. The minimum \( \varepsilon = 0.01 \) retains a 1\% probability of random action throughout evaluation to prevent the agent from becoming trapped in a deterministic but suboptimal cycle.
+The exploration schedule starts with \( \varepsilon = 1.0 \), so the
+early policy is deliberately random. This prevents the untrained network
+from committing too early to whichever action initially receives a higher
+Q-value.
+
+With a decay factor of 0.985, exploration falls to about 0.18 by episode
+100 and reaches 0.01 near episode 300. Faster decay would make the agent
+exploit too early. Slower decay would spend too much of the limited
+training budget on random actions.
 
 \subsection{Target Network Update Frequency (every 10 episodes)}
 
-The target network provides stable Q-value targets during training. If the target network updated at every step alongside the Q-network, the training targets would shift continuously, creating a moving-target problem that frequently causes Q-value divergence. Updating too infrequently (e.g., every 50 episodes) would cause the agent to train against outdated targets for too long, particularly during the rapid early learning phase. At 10 episodes, the target network is refreshed frequently enough to reflect meaningful policy improvement while remaining stable enough to provide reliable training signals between updates.
+The target network was updated every 10 episodes. Updating it at every
+step would make the target move with the online network and increase the
+risk of unstable Q-values. Updating it very rarely would leave the agent
+learning from stale targets, especially early in training. Ten episodes
+was used as a compromise between those two cases.
 
 \subsection{Reward Weighting Factor \( \lambda = 0.0004 \)}
 
-The reward function combines a Max-Pressure throughput term with a PCU-weighted accumulated waiting time penalty scaled by \( \lambda \). The role of \( \lambda \) is to determine how much the agent penalises individual vehicle waiting time relative to the aggregate pressure objective. Without the waiting time term (\( \lambda = 0 \)), the agent could learn a policy that maximises overall throughput while consistently starving one low-volume approach of green time - technically efficient but operationally unacceptable. Too large a \( \lambda \) (e.g., 0.01) would cause the agent to focus disproportionately on eliminating individual vehicle delay, potentially sacrificing overall throughput. The value \( \lambda = 0.0004 \) was selected to keep the wait penalty secondary in magnitude to the pressure term across typical PCU load ranges observed at Thapathali, so that fairness acts as a corrective constraint rather than the primary objective. At typical peak-hour stopline loads of 20–30 PCU and accumulated wait times of 30–60 seconds per vehicle, the wait penalty contributes approximately 0.24–0.72 units per vehicle to the reward, while the pressure term contributes 5–15 units, maintaining the intended hierarchy. Increasing \( \lambda \) by an order of magnitude would be expected to reduce the worst-case wait times on low-volume approaches but at the cost of overall throughput efficiency.
+The value \( \lambda = 0.0004 \) controls how strongly waiting time
+affects the reward. If \( \lambda \) were zero, the controller could
+favour high-flow approaches and ignore a smaller queue. If it were much
+larger, the agent could become too focused on individual waiting vehicles
+and reduce overall discharge. For typical peak-hour stopline loads of
+20-30 PCU and accumulated waiting times of 30-60 seconds, the penalty
+remains smaller than the pressure term. That keeps waiting time as a
+fairness correction rather than the dominant objective.
 
 \subsection{Decision Step Duration (15 seconds)}
 
-Each action is held for 15 seconds of simulation time before the agent re-evaluates the intersection state. This value represents a balance between responsiveness and stability. A shorter step (e.g., 5 seconds) would allow more frequent decisions but would increase the risk of unnecessary phase switching, as queue dynamics at Thapathali do not change meaningfully within a few seconds. Frequent switching also incurs additional yellow-phase transition time (3 seconds each), which would consume a disproportionate share of available green time. A longer step (e.g., 30 seconds) would reduce switching overhead but would limit the agent's ability to respond to rapid changes in approach demand. At 15 seconds, the agent can make approximately 4 decisions per minute - sufficient granularity to track peak-hour demand dynamics without excessive transition overhead. The maximum phase duration of 60 seconds (4 consecutive STAY actions) similarly prevents any single approach from being served indefinitely while still allowing the agent to hold a productive phase through a full queue-clearing cycle.
+The 15-second decision step was chosen after considering switching
+overhead. A 5-second step would let the agent react more often, but it
+would also create many yellow transitions and reduce useful green time.
+A 30-second step would be smoother but less responsive when queues change
+quickly. At 15 seconds, the agent can revise its decision four times per
+minute while still giving a phase enough time to clear vehicles. The
+60-second maximum phase duration prevents one approach from being held
+indefinitely.
 
 \subsection{Yellow Phase Duration (3 seconds)}
 
@@ -365,15 +412,28 @@ A 3-second yellow interval is inserted before every phase transition to reflect 
 
 \subsection{Hidden Layer Architecture (128 \( \rightarrow \) 64 \( \rightarrow \) 32 neurons)}
 
-The three-layer architecture with progressively narrowing hidden layers is designed to extract hierarchical representations from the 21-dimensional state input. The first layer (128 neurons) provides sufficient capacity to capture the full range of pairwise interactions between state features - lane loads, waiting times, and phase indicators - that jointly determine the optimal action. The subsequent layers (64 and 32 neurons) compress this representation into increasingly abstract features, forcing the network to generalise rather than memorise specific state patterns. A deeper or wider network could in principle capture more complex relationships but would require substantially more training data and episodes to converge reliably, which was not feasible within the 300-episode training budget. A shallower network (e.g., single hidden layer) risks underfitting the non-linear structure of traffic state dynamics.
+The hidden layers were arranged as 128, 64, and 32 neurons. The first
+layer gives enough capacity to combine lane loads, waiting times, and
+phase indicators. The following layers compress that information before
+the final STAY/NEXT decision. A larger network was not used because the
+training budget was limited to 300 episodes; increasing capacity without
+more data would make memorisation more likely.
 
 \subsection{Learning Rate (\( \alpha = 0.001 \)) for Adam Optimiser}
 
-The Adam optimiser's learning rate controls the step size of each gradient update to the Q-network weights. At 0.001, a standard default for Adam in DRL applications, the network updates are large enough to make meaningful progress per batch but small enough to avoid overshooting well-converged Q-value estimates. A higher learning rate (e.g., 0.01) risks Q-value oscillations and divergence, particularly during the early high-variance exploration phase. A lower rate (e.g., 0.0001) would require significantly more training episodes to converge.
+The Adam learning rate was set to 0.001. This value gave visible learning
+progress without the large oscillations observed with overly aggressive
+updates in DQN-style training. A much smaller value would likely require
+more than 300 episodes to reach a comparable policy.
 
 \subsection{Number of Training Episodes (300)}
 
-The training run of 300 episodes was selected based on the epsilon decay schedule: at \( \varepsilon_{\text{decay}} = 0.985 \) per episode, \( \varepsilon \) reaches its minimum of 0.01 by approximately episode 300, meaning the agent transitions fully to exploitation at the same point training concludes. Extending training beyond 300 episodes would primarily refine the policy under full exploitation, offering diminishing returns unless accompanied by renewed exploration. The episode reward trajectory in Figure 6-2 confirms that the moving average stabilises by approximately episode 250, supporting the adequacy of 300 episodes for this intersection configuration.
+The training length was set to 300 episodes because it matches the
+epsilon schedule: by that point, exploration has reached its minimum of
+0.01. The reward curve in Figure 6-2 also shows the moving average
+flattening after roughly episode 250. More episodes could still refine
+the policy, but they would mostly do so under near-full exploitation
+unless the exploration schedule was changed.
 
 
 
@@ -384,7 +444,14 @@ The training run of 300 episodes was selected based on the epsilon decay schedul
 
 \subsection{Learning Strategy}
 
-An $\epsilon$-greedy learning strategy was used to balance exploration and exploitation during training. The agent initially explored the environment by selecting random actions with $\epsilon$ set to 1.0, ensuring broad coverage of the state space in early episodes. After each episode, $\epsilon$ was multiplicatively decayed by a factor of 0.985, gradually reducing random exploration and allowing the agent to increasingly rely on its learned Q-values for action selection. By approximately episode 300, $\epsilon$ reached its minimum value of 0.01, at which point the agent exploits its learned policy for 99\% of decisions while retaining a small probability of random exploration to avoid getting trapped in suboptimal policies.
+An $\epsilon$-greedy learning strategy was used during training. The
+agent started with $\epsilon = 1.0$, so early decisions were random and
+the replay buffer received a wider range of traffic states.
+
+After each episode, $\epsilon$ was multiplied by 0.985. By approximately
+episode 300, it reached the minimum value of 0.01. At that point the
+agent used the learned policy for almost all decisions while still
+retaining a small chance of exploration.
 \subsection{Experience Replay}
 \noindent Experience replay improved stability by storing transitions in a 10,000-capacity buffer. Random samples were used for training to break temporal correlations.
 

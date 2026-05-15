@@ -17,7 +17,17 @@ The evaluation used the Thapathali SUMO network prepared from OpenStreetMap geom
 \section{Training Convergence and Learning Trajectory}
 \label{sec:training_convergence}
 
-Figure \ref{fig:reward_function} shows the episode reward and epsilon decay over 300 training episodes. The early episodes were intentionally noisy because the agent was still exploring; rewards stayed roughly between $\sim$5,500 and $\sim$6,000 during episodes 0--50. After that point, the curve improved as random action selection decreased and the learned Q-values had more influence. By episode 300, the 10-episode moving average reached 3,395.8 from approximately $\sim$5,300, giving about a $\sim$43\% improvement in the reward value. This trend indicates that the policy had learned a more useful phase-selection pattern, although the final policy still needs to be judged by traffic metrics rather than reward alone.
+Figure \ref{fig:reward_function} shows the episode reward and epsilon
+decay over 300 training episodes. The first 50 episodes are noisy because
+the agent is still exploring; rewards stayed roughly between $\sim$5,500
+and $\sim$6,000. After exploration decreased, the moving average began to
+improve. By episode 300, it reached 3,395.8 from approximately
+$\sim$5,300.
+
+The reward curve suggests that the agent learned a more useful
+phase-selection pattern. It is not enough by itself, however, so the
+final policy is evaluated using traffic metrics in the following
+sections.
 
 \begin{figure}[H]
     \centering
@@ -169,79 +179,72 @@ dimension of traffic performance.
 \subsection{Consistency Across Metrics}
 \label{subsec:consistency_across_metrics}
 
-The convergence of all three metrics in favour of the DQN policy is
-analytically significant. A controller that reduces wait time by
-redistributing green time aggressively toward one approach could, in
-principle, inflate queue lengths elsewhere. The simultaneous 22.90\%
-reduction in wait time, 30.06\% reduction in queue length, and 32.65\%
-improvement in throughput efficiency ratio confirm that no such
-trade-off occurred - the agent achieved system-wide improvement rather
-than localised optimisation at the cost of other movements.
+The three metrics move in the same direction, which is important for
+interpreting the result. A controller can sometimes reduce waiting time
+on one approach by shifting delay to another approach. That pattern was
+not observed in the Day 5 evaluation: average waiting time, queue length,
+and throughput efficiency all improved under the DQN policy. This does
+not prove that the policy is optimal, but it does show that the reported
+gain is not caused by improving one metric while clearly damaging
+another.
 
 \subsection{Throughput Efficiency Ratio Analysis}
 \label{subsec:throughput_efficiency_ratio_analysis}
 
-As shown in Figure 6-5, the throughput efficiency ratio measured as
-vehicles processed per second of cumulative wait time favoured the DQN
-agent at every hour of the day, with the gap widening notably during
-peak and late off-peak periods. The overall 32.65\% improvement is the
-largest gain observed across all three metrics, which is particularly
-meaningful given that total vehicle throughput remained comparable
-between the two controllers. This confirms that the DQN agent did not
-improve efficiency by processing more vehicles but rather by moving the
-same number of vehicles through the intersection with substantially less
-cumulative delay. During the morning peak (9-11 AM) the efficiency ratio
-improved by 9.33\%, and during the evening peak (4-6 PM) by 24.23\%,
-mirroring the pattern observed in wait time and queue length. The
-widening gap during evening peak hours suggests that the DQN policy is
-most differentiated from the fixed plan precisely when demand is
-heaviest and signal timing decisions carry the greatest consequence.
+Figure 6-5 compares vehicles processed per second of cumulative wait
+time. The DQN curve stays above the fixed 60-second plan throughout the
+day. The overall improvement is 32.65\%, which is the largest percentage
+gain among the three reported metrics.
+
+The result is useful because total vehicle throughput remained broadly
+comparable between the two controllers. In other words, the DQN policy
+did not simply push more vehicles into the network; it moved similar
+demand with less accumulated delay. The morning peak improvement was
+9.33\%, while the evening peak improvement was 24.23\%. This matches the
+wait-time and queue-length pattern, where the evening demand gave the
+adaptive controller more opportunity to differ from the fixed plan.
 
 \subsection{Peak Hour Behaviour}
 \label{subsec:peak_hour_behaviour}
 
-During the morning peak (9-11 AM), improvements were relatively moderate
-across all metrics: 8.26\% in wait time, 21.42\% in queue length, and
-9.33\% in throughput efficiency. In contrast, the evening peak (4-6 PM)
-yielded 19.26\%, 20.89\%, and 24.23\% improvements respectively. This
-asymmetry is consistent with the nature of the Max-Pressure reward
-function - the agent responds proportionally to pressure differentials
-across the four approaches. The evening peak at Thapathali tends to
-produce more uneven directional demand, giving the adaptive policy
-greater opportunity to outperform the fixed plan\textquotesingle s
-uniform phase allocation. The morning peak, by contrast, produces more
-symmetric saturation across all approaches simultaneously, leaving less
-room for adaptive improvement over a well-calibrated fixed plan.
+The morning and evening peaks did not behave the same way. From 9-11 AM,
+the DQN improvement was 8.26\% for wait time, 21.42\% for queue length,
+and 9.33\% for throughput efficiency. From 4-6 PM, the corresponding
+improvements were 19.26\%, 20.89\%, and 24.23\%.
+
+This difference is consistent with the reward design. The Max-Pressure
+term responds to imbalance between approaches. When the evening demand is
+more uneven, the controller has more useful decisions to make. When the
+morning demand is closer to saturation across several approaches at once,
+there is less spare green time to reallocate.
 
 \subsection{Variance Reduction}
 \label{subsec:variance_reduction}
 
-The fixed controller\textquotesingle s wait time ranged from 29s to 50s
-across hours while the DQN agent remained consistently within 23-30s.
-Similarly, queue lengths under the fixed plan sustained 10-13 vehicles
-during peak hours versus 5.9-10.3 under DQN. The throughput efficiency
-curve in Figure 6-5 reflects this same stability - the DQN ratio curve
-is not only higher but smoother than the F60 curve, indicating that the
-agent maintained consistent processing efficiency rather than producing
-sporadic bursts of high throughput separated by periods of congestion.
-This variance reduction is practically significant because it means
-commuters experience more predictable and uniform delay rather than the
-wide swings characteristic of fixed-time control.
+The fixed controller produced a wider range of hourly wait times, from
+29s to 50s. The DQN policy stayed within 23-30s for most hours. Queue
+lengths show the same pattern: the fixed plan held roughly 10-13 vehicles
+during peak periods, while DQN stayed around 5.9-10.3.
+
+This matters because average values alone can hide unstable operation.
+For a commuter, a controller with fewer extreme delay periods is more
+useful than one that performs well only in short bursts. The smoother
+throughput-efficiency curve suggests that the DQN policy reduced those
+large swings in delay.
 
 \subsection{Off-Peak Performance}
 \label{subsec:off_peak_performance}
 
-The DQN agent\textquotesingle s advantage extends clearly into off-peak
-hours, with queue length falling to 1.83 vehicles by 22:00 compared to
-5.0 under the fixed plan, and the throughput efficiency gap remaining
-visible even at low demand. This reflects the agent\textquotesingle s
-ability to shorten unnecessary red phases when vehicle arrivals are
-sparse - a structural limitation of fixed-time control that allocates
-green time uniformly regardless of actual demand, thereby accumulating
-wait time even when queues are minimal. The 47.17\% wait time
-improvement at 21:00 is the single largest hourly gain recorded,
-highlighting precisely how wasteful fixed-cycle operation becomes during
-low-demand periods.
+The off-peak result shows why fixed timing is inefficient when demand is
+low. By 22:00, the average queue length under DQN was 1.83 vehicles,
+compared with 5.0 under the fixed plan. The largest hourly wait-time
+improvement, 47.17\%, occurred at 21:00.
+
+At those hours, the benefit is not mainly from handling heavy congestion.
+It comes from avoiding unnecessary red time when arrivals are sparse. A
+fixed cycle keeps serving phases according to schedule even if the active
+movement has little traffic. The DQN policy can move away from that phase
+sooner.
 
 \subsection{Failure Case Analysis}
 \label{subsec:failure_case_analysis}
@@ -294,14 +297,14 @@ limitations were identified that qualify the scope of these results:
 \subsection{Summary}
 \label{subsec:summary}
 
-Taken together, these results confirm that the DQN policy learned a
-generalisable and robust signal control strategy, not merely one
-optimised for a narrow demand condition. The consistency of improvement
-across wait time, queue length, and throughput efficiency and the
-alignment of their peak-hour patterns indicate that all three metrics
-are capturing the same underlying phenomenon-the DQN agent allocates
-green time more precisely in response to real-time intersection state,
-reducing both the duration and the downstream consequences of vehicle
-delay. The hour-by-hour breakdown in Table 6.6.1 supports this
-interpretation, showing no hour in which the fixed controller equals or
-surpasses the DQN on any metric.
+The results support a narrower conclusion: for the Day 5 demand used in
+testing, the DQN policy handled phase changes better than the fixed
+60-second plan. The evidence is strongest because the same pattern
+appears in all three metrics. Wait time falls, queue length falls, and
+throughput per wait second rises.
+
+The result should still be read within the limits of the experiment. The
+agent was not tested against accidents, festivals, lane blockage, or
+fully calibrated downstream intersections. What the evaluation shows is
+that, under the available Thapathali demand data, using the observed
+traffic state gives a clear advantage over a fixed cycle.

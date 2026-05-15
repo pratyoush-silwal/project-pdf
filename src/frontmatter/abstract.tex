@@ -5,10 +5,35 @@
 \phantomsection
 \addcontentsline{toc}{chapter}{ABSTRACT}
 
-Thapathali is a difficult intersection to control because demand does not rise evenly on all approaches. A fixed signal cycle may be acceptable for a short period, but it cannot easily respond when one direction builds a queue while another has already cleared. This project examines that problem at the level of a single junction and asks whether a Deep Q-Network (DQN) controller can make better phase decisions from the traffic state observed in simulation.
+This report studies adaptive signal control at the Thapathali
+intersection in Kathmandu. The problem is not only that traffic volume is
+high; the heavier movement changes by time of day, so a fixed signal
+cycle can keep serving one approach after its queue has reduced while
+another approach continues to wait. The project therefore tests whether a
+Deep Q-Network (DQN) controller can make better phase decisions from the
+traffic state available in simulation.
 
-The road network was prepared in SUMO from OpenStreetMap geometry, and the traffic demand was derived from five days of Origin-Destination (OD) and vehicle-count data for Thapathali. Every 15 seconds, the agent receives a 21-dimensional state vector containing PCU-weighted incoming and outgoing lane loads, maximum stopline waiting times, and the active signal phase. The action space was kept intentionally narrow: the controller either holds the current phase (STAY) or advances to the next phase (NEXT) in a three-phase cycle, with a yellow transition before switching. This keeps the learned policy close to a signal operation that could be inspected by a traffic engineer.
+The SUMO network was prepared from OpenStreetMap geometry and traffic
+demand derived from five days of Origin-Destination (OD) and
+vehicle-count data for Thapathali. At each 15-second decision step, the
+agent receives a 21-dimensional state vector: PCU-weighted incoming
+loads, outgoing loads, stopline waiting times, and the active signal
+phase. The action space was kept deliberately small. The controller can
+hold the current phase (STAY) or advance to the next phase (NEXT) in a
+three-phase cycle, with yellow time before the change.
 
-The reward function follows a Max-Pressure idea with an additional waiting-time penalty, so the agent is encouraged to clear loaded approaches without repeatedly neglecting a smaller queue. After 300 training episodes with experience replay and epsilon-greedy exploration, the trained policy was evaluated against a fixed 60-second plan on Day 5 demand. The DQN policy reduced average waiting time by 22.90\%, reduced average queue length by 30.06\%, and improved throughput efficiency by 32.65\%. The gains were strongest during low-to-moderate demand, when fixed timing wastes green time on lightly loaded movements. During peak saturation, the improvement was smaller, which indicates that signal control can reduce delay but cannot remove the capacity limits created by intersection geometry and heavy demand. The result therefore supports further simulation-based study of adaptive control at Thapathali, particularly with pedestrians, public transport, and neighbouring intersections included in later work.
+The reward uses a Max-Pressure term with an additional waiting-time
+penalty. This was chosen to clear loaded approaches while still
+penalising long waits on smaller movements.
+
+After 300 training episodes, the DQN policy was tested against a fixed
+60-second plan on Day 5 demand. Average waiting time decreased by
+22.90\%, average queue length by 30.06\%, and throughput efficiency
+improved by 32.65\%.
+
+The strongest improvements occurred in low-to-moderate demand, where
+fixed timing often wastes green time. Under peak saturation, the gain was
+smaller. This shows that signal control can improve allocation, but it
+cannot remove the capacity limit of the intersection itself.
 \vspace{2em}\\
 \noindent\textbf{Keywords:} \textit{Adaptive Control, \gls{dqn}, \gls{drl}, Max-Pressure Theory, Queue Length, \gls{sumo}, Throughput, Traffic Signal Control}
